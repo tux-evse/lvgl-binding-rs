@@ -1,0 +1,16 @@
+References:
+ - https://github.com/lvgl/lv_binding_rust
+ - DEP_LV_CONFIG_PATH=`pwd`/examples/include cargo run --example arc --features="alloc,embedded_graphics"
+
+Dependencies:
+ - Linux packages: libsdl  (llvm, clang, gcc, ...)
+    Fedora: sudo dnf install SDL2-devel
+    OpenSuSe: sudo zypper install libsdl2-devel
+    Ubuntu: udo apt install libsdl2-dev
+
+
+Add lvgl to your project
+ - cargo add lvgl
+
+Building
+  - DEP_LV_CONFIG_PATH=`pwd`/lvgl/config cargo build
