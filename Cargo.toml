@@ -1,34 +1,9 @@
-[package]
-name = "tuxevse-display"
-version = "0.0.1"
-edition = "2021"
-authors = ["Fulup Le Foll <fulup@iot.bzh>"]
-publish = false
+[workspace]
+resolver = "2"
 
-[features]
-default = ["embedded_graphics","alloc"]
-embedded_graphics = ["embedded-graphics"]
-alloc = ["cstr_core/alloc"]
+members = [
+    "lvgl-gui",
+    "lvgl-gui",
+    "afb-binding",
+]
 
-[dependencies]
-serde = { version = "1.0", features = ["derive"] }
-serde_json={ version= "1.0"}
-lib_libafb= {path= "../../Rust/afb-librust/libafb"}
-lvgl = {path= "../lv_binding_rust/lvgl"}
-lvgl-sys = {version = "0.6.2", path= "../lv_binding_rust/lvgl-sys"}
-embedded-graphics = { version = "0.8", optional = true }
-cstr_core = { version = "0.2", default-features = false, features = ["alloc"] }
-embedded-graphics-simulator = "0.5"
-
-[dev-dependencies]
-# embedded-graphics-simulator = "0.4"
-
-[lib]
-name = "lvgl"
-crate-type = ["cdylib"]
-path = "src/lvgl-libso.rs"
-required-features = ["lvgl_alloc", "embedded_graphics"]
-
-[[example]]
-name = "lvgl-arc"
-path = "src/lvgl-arc.rs"

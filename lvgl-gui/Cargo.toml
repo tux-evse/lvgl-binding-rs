@@ -1,0 +1,22 @@
+[package]
+name = "lvgl_gui"
+version = "0.0.1"
+edition = "2021"
+authors = ["Fulup Le Foll <fulup@iot.bzh>"]
+publish = false
+
+[dependencies]
+afbv4 = {git= "https://github.com/redpesk-common/afb-librust", branch="master", optional = true}
+lvgl = {path ="../lvgl-lib"}
+
+
+[build-dependencies]
+bindgen    = ">=0.6"
+cc = "1"
+
+[lib]
+name = "lvgl_gui"
+crate-type = ["lib"]
+path = "src/libso.rs"
+
+

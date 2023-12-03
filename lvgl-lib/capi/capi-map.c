@@ -13,27 +13,29 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-#![doc(
-    html_logo_url = "https://iot.bzh/images/defaults/company/512-479-max-transp.png",
-    html_favicon_url = "https://iot.bzh/images/defaults/favicon.ico"
-)]
+#define LV_CONF_INCLUDE_SIMPLE 1
+#define USE_FBDEV 1
+#define USE_EVDEV 1
 
-extern crate libafb;
-extern crate serde;
-extern crate lvgl;
+#include "lvgl/lvgl.h"
+#include "lv_drivers/display/fbdev.h"
+#include "lv_drivers/indev/evdev.h"
 
-// import libafb dependencies
-use libafb::prelude::*;
-
-#[path = "lvgl-display.rs"]
-pub mod display;
+#include "../assets/button_left.c"
+#include "../assets/button_mid.c"
+#include "../assets/button_right.c"
+#include "../assets/mouse_cursor.c"
 
 
-#[path = "lvgl-binding.rs"]
-pub mod binding;
+// import some usefull inline macro
+lv_color_t lv_color_mk(uint8_t r, uint8_t g, uint8_t b)
+{
+    return _LV_COLOR_MAKE_TYPE_HELPER LV_COLOR_MAKE(r, g, b);
+}
 
-#[path = "lvgl-verbs.rs"]
-mod verbs;
+lv_obj_t * lv_scr_action(void)
+{
+    return lv_disp_get_scr_act(lv_disp_get_default());
+}
