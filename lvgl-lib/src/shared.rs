@@ -21,6 +21,18 @@ use std::mem;
 use std::os::raw;
 use std::{thread, time};
 
+pub trait LvglCommon {
+    fn get_handle(&self) -> *mut cglue::lv_obj_t;
+    fn get_style(&self) -> *mut cglue::lv_style_t;
+    fn get_uid(&self) -> &'static str;
+    fn get_info(&self) -> &'static str;
+    fn get_generic(&'static self) -> LvglWidget;
+    fn get_callback(&self) -> Option<*mut dyn LvglHandler>;
+    fn finalize(&'static self) -> &'static LvglWidget;
+    fn callback(&self, _event: &cglue::lv_event_t) {}
+    fn set_callback(&'static self, ctrlbox: Option<*mut dyn LvglHandler>);
+    fn set_info(&self, info: &'static str) -> &Self;
+}
 // common trait should be implemented for each widget because internal object struct is not identical
 #[macro_export]
 macro_rules! impl_widget_trait {
@@ -30,9 +42,12 @@ macro_rules! impl_widget_trait {
                 self.uid
             }
             fn get_info(&self) -> &'static str {
-                self.info
+                self.info.get()
             }
-
+            fn set_info(&self, info: &'static str) -> &Self {
+                self.info.set(info);
+                self
+            }
             fn get_handle(&self) -> *mut cglue::_lv_obj_t {
                 self.handle
             }
@@ -45,19 +60,22 @@ macro_rules! impl_widget_trait {
             fn get_generic(&'static self) -> LvglWidget {
                 LvglWidget::$object(self)
             }
+            // if callback not set do it
             fn set_callback(&'static self, ctrlbox: Option<*mut dyn LvglHandler>) {
-                match ctrlbox {
-                    None => {}
-                    Some(_value) => {
-                        self.ctrlbox.set(ctrlbox);
-                        let context = Box::leak(Box::new(LvglWidget::$object(self)));
-                        unsafe {
-                            cglue::lv_obj_add_event_cb(
-                                self.get_handle(),
-                                Some(lvgl_events_cb),
-                                cglue::lv_event_code_t_LV_EVENT_ALL,
-                                context as *const _ as *mut raw::c_void,
-                            );
+                if let None = self.ctrlbox.get() {
+                    match ctrlbox {
+                        None => {}
+                        Some(_value) => {
+                            self.ctrlbox.set(ctrlbox);
+                            let context = Box::leak(Box::new(LvglWidget::$object(self)));
+                            unsafe {
+                                cglue::lv_obj_add_event_cb(
+                                    self.get_handle(),
+                                    Some(lvgl_events_cb),
+                                    cglue::lv_event_code_t_LV_EVENT_ALL,
+                                    context as *const _ as *mut raw::c_void,
+                                );
+                            }
                         }
                     }
                 }
@@ -68,18 +86,6 @@ macro_rules! impl_widget_trait {
         }
         impl LvglMethod for $widget {}
     };
-}
-
-pub trait LvglCommon {
-    fn get_handle(&self) -> *mut cglue::lv_obj_t;
-    fn get_style(&self) -> *mut cglue::lv_style_t;
-    fn get_uid(&self) -> &'static str;
-    fn get_info(&self) -> &'static str;
-    fn get_generic(&'static self) -> LvglWidget;
-    fn get_callback(&self) -> Option<*mut dyn LvglHandler>;
-    fn finalize(&'static self) -> &'static LvglWidget;
-    fn callback(&self, _event: &cglue::lv_event_t) {}
-    fn set_callback(&'static self, ctrlbox: Option<*mut dyn LvglHandler>);
 }
 
 pub struct LvglColor {

@@ -9,11 +9,10 @@
         {
             "uid": "display-lvgl",
             "api": "display",
-            "path": "${CARGO_TARGET_DIR}debug/libafb_display.so",
+            "path": "${CARGO_TARGET_DIR}debug/libafb_lvgl.so",
             "info": "lvgl embedded display binding",
             "permission": "acl:display:client",
             "display": {
-                // Full HD screen
                 "x_res": 1024,
                 "y_res": 800,
                 "ration": 1

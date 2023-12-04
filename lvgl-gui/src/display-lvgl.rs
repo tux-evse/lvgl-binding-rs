@@ -68,7 +68,8 @@ impl DisplayHandle {
 
     pub fn draw_panel(&mut self) -> &mut Self {
         self.panel.push(
-            LvglLabel::new("Label-1", "Demo Label widget", "Tux EvSe UI", 20, 400)
+            LvglLabel::new("Label-1", "Tux EvSe UI", 20, 400)
+                .set_info("Demo Label widget")
                 .set_size(300, 100)
                 .set_color(LvglColor::rvb(0, 0, 0))
                 .set_background(LvglColor::rvb(0xFF, 0xFF, 0xFF))
@@ -77,34 +78,31 @@ impl DisplayHandle {
         );
 
         self.panel.push(
-            LvglIcon::new("Icon-wifi", "Demo Wifi Icon", LvglPixmap::WIFI, 750, 0).finalize(),
+            LvglIcon::new("Icon-wifi", LvglPixmap::WIFI, 750, 0)
+                .set_info("Demo Wifi Icon")
+                .finalize(),
         );
 
         self.panel.push(
-            LvglIcon::new(
-                "Icon-Battery",
-                "Demo Battery Icon",
-                LvglPixmap::BATTERY_2,
-                700,
-                0,
-            )
-            .set_size(75, 75)
-            .finalize(),
+            LvglIcon::new("Icon-Battery", LvglPixmap::BATTERY_2, 700, 0)
+                .set_info("Demo Battery Icon")
+                .set_size(75, 75)
+                .finalize(),
         );
 
         self.panel.push(
-            LvglButton::new("Button-A", "Demo Button 1", "Test-1", 100, 100)
+            LvglButton::new("Button-A", "Test-1", 100, 100)
+                .set_info("Demo Button 1")
                 .set_size(180, 100)
                 .finalize(),
         );
 
         self.panel
-            .push(LvglButton::new("button-B", "Demo Button 2", "Test-2", 300, 100).finalize());
+            .push(LvglButton::new("button-B", "Test-2", 300, 100).finalize());
 
         self.panel.push(
             LvglImgButton::new(
                 "btn_img",
-                "Demo Image Button",
                 "waiting",
                 500,
                 400,
@@ -112,12 +110,14 @@ impl DisplayHandle {
                 5,
                 10,
             )
+            .set_info("Demo Image Button")
             .set_size(180, 100)
             .finalize(),
         );
 
         self.panel.push(
-            LvglTextArea::new("Text-Area", "Demo Text area Zone", 0, 750)
+            LvglTextArea::new("Text-Area", 0, 750)
+                .set_info("Demo Text area Zone")
                 .set_width(800)
                 .set_text("display message zone")
                 .finalize(),

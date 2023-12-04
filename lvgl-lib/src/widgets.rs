@@ -83,7 +83,7 @@ impl LvglWidget {
 
 pub struct LvglButton {
     uid: &'static str,
-    info: &'static str,
+    info: Cell<&'static str>,
     handle: *mut cglue::_lv_obj_t,
     label: *mut cglue::_lv_obj_t,
     style: *mut cglue::lv_style_t,
@@ -92,7 +92,7 @@ pub struct LvglButton {
 
 impl_widget_trait!(LvglButton, Button);
 impl LvglButton {
-    pub fn new(uid: &'static str, info: &'static str,label: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(uid: &'static str,label: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
             let text = match CString::new(label) {
                 Err(_) => CString::new("Non UTF8 label").unwrap(),
@@ -111,7 +111,7 @@ impl LvglButton {
             let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
             let widget = LvglButton {
                 uid,
-                info,
+                info: Cell::new(""),
                 handle,
                 style,
                 label,
@@ -157,7 +157,7 @@ impl LvglButton {
 
 pub struct LvglImgButton {
     uid: &'static str,
-    info: &'static str,
+    info: Cell<&'static str>,
     handle: *mut cglue::_lv_obj_t,
     style: *mut cglue::lv_style_t,
     _style_pr: *mut cglue::lv_style_t,
@@ -168,7 +168,6 @@ impl_widget_trait!(LvglImgButton, ImgButton);
 impl LvglImgButton {
     pub fn new(
         uid: &'static str,
-        info: &'static str,
         label: &'static str,
         x_ofs: i16,
         y_ofs: i16,
@@ -229,7 +228,7 @@ impl LvglImgButton {
 
             let widget = LvglImgButton {
                 uid,
-                info,
+                info: Cell::new(""),
                 handle,
                 style,
                 _style_pr: style_pr,
@@ -253,14 +252,14 @@ impl LvglImgButton {
 
 pub struct LvglLabel {
     uid: &'static str,
-    info: &'static str,
+    info: Cell<&'static str>,
     handle: *mut cglue::_lv_obj_t,
     style: *mut cglue::lv_style_t,
     ctrlbox: Cell<Option<*mut dyn LvglHandler>>,
 }
 impl_widget_trait!(LvglLabel, Label);
 impl LvglLabel {
-    pub fn new(uid: &'static str, info: &'static str, label: &str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(uid: &'static str, label: &str, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
             let handle = cglue::lv_label_create(cglue::lv_scr_action());
             cglue::lv_label_set_recolor(handle, false);
@@ -274,7 +273,7 @@ impl LvglLabel {
             let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
             let widget = LvglLabel {
                 uid,
-                info,
+                info: Cell::new(""),
                 handle,
                 style,
                 ctrlbox: Cell::new(None),
@@ -297,14 +296,14 @@ impl LvglLabel {
 
 pub struct LvglIcon {
     uid: &'static str,
-    info: &'static str,
+    info: Cell<&'static str>,
     handle: *mut cglue::_lv_obj_t,
     style: *mut cglue::lv_style_t,
     ctrlbox: Cell<Option<*mut dyn LvglHandler>>,
 }
 impl_widget_trait!(LvglIcon, Icon);
 impl LvglIcon {
-    pub fn new(uid: &'static str, info: &'static str, pixmap: &[u8], x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(uid: &'static str, pixmap: &[u8], x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
             let handle = cglue::lv_img_create(cglue::lv_scr_action());
             cglue::lv_img_set_src(handle, pixmap as *const _ as *mut raw::c_void);
@@ -316,7 +315,7 @@ impl LvglIcon {
             let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
             let widget = LvglIcon {
                 uid,
-                info,
+                info: Cell::new(""),
                 handle,
                 style,
                 ctrlbox: Cell::new(None),
@@ -336,14 +335,14 @@ impl LvglIcon {
 
 pub struct LvglTextArea {
     uid: &'static str,
-    info: &'static str,
+    info: Cell<&'static str>,
     handle: *mut cglue::_lv_obj_t,
     style: *mut cglue::lv_style_t,
     ctrlbox: Cell<Option<*mut dyn LvglHandler>>,
 }
 impl_widget_trait!(LvglTextArea, TextArea);
 impl LvglTextArea {
-    pub fn new(uid: &'static str, info: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
             let handle = cglue::lv_textarea_create(cglue::lv_scr_action());
             cglue::lv_obj_set_style_text_align(handle, cglue::LV_TEXT_ALIGN_CENTER as u8, 0);
@@ -363,7 +362,7 @@ impl LvglTextArea {
             let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
             let widget = LvglTextArea {
                 uid,
-                info,
+                info: Cell::new(""),
                 handle,
                 style,
                 ctrlbox: Cell::new(None),

@@ -13,6 +13,6 @@ serde_json={ version= "1.0"}
 lvgl_gui= {path ="../lvgl-gui"}
 
 [lib]
-name = "afb_display"
+name = "afb_lvgl"
 crate-type = ["cdylib"]
 path = "src/libso.rs"
