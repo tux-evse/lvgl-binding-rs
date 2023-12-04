@@ -28,6 +28,8 @@
 #include "../assets/button_right.c"
 #include "../assets/mouse_cursor.c"
 
+const lv_point_t line_points[] = { {5, 5}, {70, 70}, {120, 10}, {180, 60}, {240, 10} };
+
 
 // import some usefull inline macro
 lv_color_t lv_color_mk(uint8_t r, uint8_t g, uint8_t b)

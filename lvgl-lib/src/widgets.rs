@@ -28,6 +28,9 @@ pub enum LvglWidget {
     Button(&'static LvglButton),
     Icon(&'static LvglIcon),
     TextArea(&'static LvglTextArea),
+    Led(&'static LvglLed),
+    Line(&'static LvglLine),
+    Image(&'static LvglImage),
 }
 
 pub trait LvglHandler {
@@ -42,6 +45,7 @@ impl LvglWidget {
             LvglWidget::Button(this) => this.callback(event),
             LvglWidget::ImgButton(this) => this.callback(event),
             LvglWidget::Icon(this) => this.callback(event),
+            LvglWidget::Image(this) => this.callback(event),
             _ => {}
         }
     }
@@ -61,6 +65,9 @@ impl LvglWidget {
             LvglWidget::ImgButton(this) => this.get_uid(),
             LvglWidget::Icon(this) => this.get_uid(),
             LvglWidget::TextArea(this) => this.get_uid(),
+            LvglWidget::Led(this) => this.get_uid(),
+            LvglWidget::Line(this) => this.get_uid(),
+            LvglWidget::Image(this) => this.get_uid(),
         }
     }
     pub fn get_info(&self) -> &'static str {
@@ -70,13 +77,20 @@ impl LvglWidget {
             LvglWidget::ImgButton(this) => this.get_info(),
             LvglWidget::Icon(this) => this.get_info(),
             LvglWidget::TextArea(this) => this.get_info(),
+            LvglWidget::Led(this) => this.get_info(),
+            LvglWidget::Line(this) => this.get_info(),
+            LvglWidget::Image(this) => this.get_info(),
         }
     }
     pub fn set_text(&self, text: &str) {
         match self {
-            LvglWidget::Label(this) => {this.set_text(text);},
-            LvglWidget::TextArea(this) => {this.set_text(text);},
-            _ => {},
+            LvglWidget::Label(this) => {
+                this.set_text(text);
+            }
+            LvglWidget::TextArea(this) => {
+                this.set_text(text);
+            }
+            _ => {}
         }
     }
 }
@@ -92,7 +106,7 @@ pub struct LvglButton {
 
 impl_widget_trait!(LvglButton, Button);
 impl LvglButton {
-    pub fn new(uid: &'static str,label: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(uid: &'static str, label: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
             let text = match CString::new(label) {
                 Err(_) => CString::new("Non UTF8 label").unwrap(),
@@ -333,6 +347,50 @@ impl LvglIcon {
     }
 }
 
+pub struct LvglImage {
+    uid: &'static str,
+    info: Cell<&'static str>,
+    handle: *mut cglue::_lv_obj_t,
+    style: *mut cglue::lv_style_t,
+    ctrlbox: Cell<Option<*mut dyn LvglHandler>>,
+}
+impl_widget_trait!(LvglImage, Image);
+impl LvglImage {
+    pub fn new(uid: &'static str, path: &str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+        let filepath = match CString::new(path) {
+            Err(_) => CString::new("Non UTF8 path").unwrap(),
+            Ok(value) => value,
+        };
+
+        unsafe {
+            let handle = cglue::lv_img_create(cglue::lv_scr_action());
+            cglue::lv_img_set_src(handle, filepath.as_ptr() as *mut raw::c_void);
+            cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
+            let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
+            cglue::lv_style_init(style);
+
+            // create widget object and set image text
+            let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
+            let widget = LvglImage {
+                uid,
+                info: Cell::new(""),
+                handle,
+                style,
+                ctrlbox: Cell::new(None),
+            };
+            Box::leak(Box::new(widget))
+        }
+    }
+    pub fn callback(&self, event: &cglue::lv_event_t) {
+        match event.code {
+            cglue::lv_event_code_t_LV_EVENT_PRESSED => {}
+            cglue::lv_event_code_t_LV_EVENT_CLICKED => {}
+            _ => return, // ignore other events
+        }
+        println!("LvgImage  uid:{} code:{}", self.uid, event.code);
+    }
+}
+
 pub struct LvglTextArea {
     uid: &'static str,
     info: Cell<&'static str>,
@@ -372,7 +430,6 @@ impl LvglTextArea {
     }
 
     pub fn set_text(&self, text: &str) -> &Self {
-        println! ("**** set_text {}", text);
         unsafe {
             let text = match CString::new(text) {
                 Err(_) => CString::new("Non UTF8 text").unwrap(),
@@ -391,6 +448,130 @@ impl LvglTextArea {
             };
             cglue::lv_textarea_set_text(self.handle, text.as_ptr());
         }
+        self
+    }
+}
+
+pub struct LvglLed {
+    uid: &'static str,
+    info: Cell<&'static str>,
+    handle: *mut cglue::_lv_obj_t,
+    style: *mut cglue::lv_style_t,
+    ctrlbox: Cell<Option<*mut dyn LvglHandler>>,
+}
+impl_widget_trait!(LvglLed, Led);
+impl LvglLed {
+    pub fn new(uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+        unsafe {
+            let handle = cglue::lv_led_create(cglue::lv_scr_action());
+            cglue::lv_obj_set_style_text_align(handle, cglue::LV_TEXT_ALIGN_CENTER as u8, 0);
+            cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
+            cglue::lv_led_off(handle);
+
+            let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
+            cglue::lv_style_init(style);
+
+            // create widget object and set text text
+            let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
+            let widget = LvglLed {
+                uid,
+                info: Cell::new(""),
+                handle,
+                style,
+                ctrlbox: Cell::new(None),
+            };
+            Box::leak(Box::new(widget))
+        }
+    }
+
+    pub fn set_color(&self, color: LvglColor) -> &Self {
+        unsafe { cglue::lv_led_set_color(self.handle, color.handle) };
+        self
+    }
+
+    pub fn set_brightness(&self, bright: u8) -> &Self {
+        unsafe { cglue::lv_led_set_brightness(self.handle, bright) };
+        self
+    }
+
+    pub fn set_on(&self, status: bool) -> &Self {
+        unsafe {
+            if status {
+                cglue::lv_led_on(self.handle);
+            } else {
+                cglue::lv_led_off(self.handle);
+            }
+        }
+        self
+    }
+}
+
+pub struct LvglLine {
+    uid: &'static str,
+    info: Cell<&'static str>,
+    handle: *mut cglue::_lv_obj_t,
+    style: *mut cglue::lv_style_t,
+    ctrlbox: Cell<Option<*mut dyn LvglHandler>>,
+}
+impl_widget_trait!(LvglLine, Line);
+impl LvglLine {
+    pub fn new(uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+        unsafe {
+            let handle = cglue::lv_line_create(cglue::lv_scr_action());
+            cglue::lv_obj_set_style_text_align(handle, cglue::LV_TEXT_ALIGN_CENTER as u8, 0);
+            cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
+
+            let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
+            cglue::lv_style_init(style);
+            cglue::lv_obj_add_style(handle, style, 0);
+            cglue::lv_line_set_points(handle, &cglue::line_points as *const cglue::lv_point_t, 10);
+
+            let widget = LvglLine {
+                uid,
+                info: Cell::new(""),
+                handle,
+                style,
+                ctrlbox: Cell::new(None),
+            };
+            Box::leak(Box::new(widget))
+        }
+    }
+
+    pub fn set_points(&self, points: &[LvglPoint]) -> &Self {
+        unsafe {
+            cglue::lv_line_set_points(
+                self.handle,
+                points.as_ptr() as *const cglue::lv_point_t,
+                points.len() as u16,
+            );
+        }
+        self
+    }
+
+    pub fn set_width(&self, width: i16) -> &Self {
+        unsafe {
+            cglue::lv_style_set_line_width(self.style, width);
+        }
+        self
+    }
+
+    pub fn set_color(&self, color: LvglColor) -> &Self {
+        unsafe {
+            cglue::lv_style_set_line_color(self.style, color.handle);
+        };
+        self
+    }
+
+    pub fn set_rounded(&self, value: bool) -> &Self {
+        unsafe {
+            cglue::lv_style_set_line_rounded(self.style, value);
+        };
+        self
+    }
+
+    pub fn set_point(&self, line_points: &cglue::lv_point_t, num_points: u16) -> &Self {
+        unsafe { cglue::lv_line_set_points(self.handle, line_points, num_points) };
+
         self
     }
 }

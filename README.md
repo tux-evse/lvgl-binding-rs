@@ -1,5 +1,5 @@
-# scard-binding-rs
-Scard lvgl reader afb binding
+# lvgl-binding-rs
+Embedded graphic lvgl Rust afb-v4 binding
 
 ## testing without root privilege
 

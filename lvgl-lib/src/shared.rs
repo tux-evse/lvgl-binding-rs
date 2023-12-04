@@ -88,6 +88,8 @@ macro_rules! impl_widget_trait {
     };
 }
 
+pub type LvglPoint = cglue::lv_point_t;
+
 pub struct LvglColor {
     pub(crate) handle: cglue::lv_color_t,
 }

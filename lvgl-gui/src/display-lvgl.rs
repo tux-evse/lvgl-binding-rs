@@ -68,7 +68,7 @@ impl DisplayHandle {
 
     pub fn draw_panel(&mut self) -> &mut Self {
         self.panel.push(
-            LvglLabel::new("Label-1", "Tux EvSe UI", 20, 400)
+            LvglLabel::new("Label-1", "Tux EvSe UI", 50, 400)
                 .set_info("Demo Label widget")
                 .set_size(300, 100)
                 .set_color(LvglColor::rvb(0, 0, 0))
@@ -78,27 +78,69 @@ impl DisplayHandle {
         );
 
         self.panel.push(
-            LvglIcon::new("Icon-wifi", LvglPixmap::WIFI, 750, 0)
+            LvglIcon::new("Icon-wifi", LvglPixmap::WIFI, 1000, 0)
                 .set_info("Demo Wifi Icon")
                 .finalize(),
         );
 
         self.panel.push(
-            LvglIcon::new("Icon-Battery", LvglPixmap::BATTERY_2, 700, 0)
-                .set_info("Demo Battery Icon")
+            LvglIcon::new("Icon-Nfc", LvglPixmap::SD_CARD, 950, 0)
+                .set_color(LvglColor::rvb(255,0,0))
+                .finalize(),
+        );
+
+        self.panel.push(
+            LvglIcon::new("Icon-Battery", LvglPixmap::BATTERY_2, 900, 0)
+                .finalize(),
+        );
+
+        self.panel.push(
+            LvglIcon::new("Icon-Battery", LvglPixmap::BATTERY_2, 850, 0)
                 .set_size(75, 75)
                 .finalize(),
         );
 
         self.panel.push(
-            LvglButton::new("Button-A", "Test-1", 100, 100)
+            LvglLed::new("Led-Red", 650, 5)
+                .set_color(LvglColor::palette(LvglPalette::RED))
+                .set_size(10, 10)
+                .set_on(true)
+                .finalize(),
+        );
+
+        self.panel.push(
+            LvglLed::new("Led-Green", 630, 5)
+                .set_color(LvglColor::rvb(0, 255, 0))
+                .set_brightness(255)
+                .set_size(10, 10)
+                .set_on(true)
+                .finalize(),
+        );
+        let points = [
+            LvglPoint { x: 5, y: 5 },
+            LvglPoint { x: 70, y: 70 },
+            LvglPoint { x: 120, y: 100 },
+            LvglPoint { x: 180, y: 60 },
+            LvglPoint { x: 240, y: 10 },
+        ];
+        self.panel.push(
+            LvglLine::new("Line", 10, 300)
+                .set_color(LvglColor::rvb(255, 40, 100))
+                .set_width(8)
+                .set_rounded(true)
+                .set_points(&points)
+                .finalize(),
+        );
+
+        self.panel.push(
+            LvglButton::new("Button-A", "Test-1", 100, 200)
                 .set_info("Demo Button 1")
                 .set_size(180, 100)
                 .finalize(),
         );
 
         self.panel
-            .push(LvglButton::new("button-B", "Test-2", 300, 100).finalize());
+            .push(LvglButton::new("button-B", "Test-2", 300, 200).finalize());
 
         self.panel.push(
             LvglImgButton::new(
@@ -116,9 +158,9 @@ impl DisplayHandle {
         );
 
         self.panel.push(
-            LvglTextArea::new("Text-Area", 0, 750)
+            LvglTextArea::new("Text-Area", 0, 550)
                 .set_info("Demo Text area Zone")
-                .set_width(800)
+                .set_width(600)
                 .set_text("display message zone")
                 .finalize(),
         );
