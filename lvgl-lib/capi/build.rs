@@ -61,6 +61,8 @@ fn main() {
         .allowlist_item("line_.*")
         .allowlist_item("lv_arc_.*")
         .allowlist_item("lv_meter_.*")
+        .allowlist_item("lv_switch_.*")
+        .allowlist_item("lv_bar_.*")
 
 
         .generate()

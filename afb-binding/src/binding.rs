@@ -13,20 +13,30 @@
 use crate::prelude::*;
 use afbv4::prelude::*;
 use lvgl_gui::prelude::*;
+use serde::{Deserialize, Serialize};
 
 pub(crate) fn to_static_str(value: String) -> &'static str {
     Box::leak(value.into_boxed_str())
 }
 
-AfbDataConverter!(api_actions, ApiAction);
-use serde::{Deserialize, Serialize};
+AfbDataConverter!(api_arg_subscribe, QuerySubscribe);
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(tag = "action")]
-pub(crate) enum ApiAction {
+pub(crate) enum QuerySubscribe {
     #[default]
     SUBSCRIBE,
     UNSUBSCRIBE,
 }
+
+AfbDataConverter!(api_arg_switch, QuerySwitch);
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(tag = "action")]
+pub(crate) enum QuerySwitch {
+    #[default]
+    ON,
+    OFF,
+}
+
 
 fn json_to_color(jcolor: JsoncObj) -> Result<LvglColor, AfbError> {
     let red = jcolor.get::<u32>("red")?;
@@ -40,7 +50,8 @@ fn json_to_color(jcolor: JsoncObj) -> Result<LvglColor, AfbError> {
 // -----------------------------------------
 pub fn binding_init(rootv4: AfbApiV4, jconf: JsoncObj) -> Result<&'static AfbApi, AfbError> {
     // add binding custom converter
-    api_actions::register()?;
+    api_arg_subscribe::register()?;
+    api_arg_switch::register()?;
 
     let uid = if let Ok(value) = jconf.get::<String>("uid") {
         to_static_str(value)

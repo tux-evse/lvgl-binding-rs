@@ -57,16 +57,14 @@ impl DisplayHandle {
     }
 
     pub fn get_by_uid(&self, uid: &str) -> &'static dyn Any {
-
-        match self
+        let widget = match self
             .panel
             .binary_search_by(|widget| widget.get_uid().cmp(uid))
         {
-            Ok(index) => {
-                self.panel[index].as_any()
-            },
-            Err(_) =>  &0 // return a dummy value
-        }
+            Ok(index) => self.panel[index].as_any(),
+            Err(_) => &0, // return a dummy value
+        };
+        widget
     }
 
     pub fn draw_panel(&mut self) -> &mut Self {
@@ -97,6 +95,7 @@ impl DisplayHandle {
 
         self.panel.push(
             LvglLed::new("Led-Red", 850, 5)
+                .set_info("red led")
                 .set_color(LvglColor::palette(LvglPalette::RED))
                 .set_size(10, 10)
                 .set_on(true)
@@ -106,9 +105,24 @@ impl DisplayHandle {
         self.panel.push(
             LvglLed::new("Led-Green", 800, 5)
                 .set_color(LvglColor::rvb(0, 255, 0))
+                .set_info("green led")
                 .set_brightness(255)
                 .set_size(10, 10)
                 .set_on(true)
+                .finalize(),
+        );
+
+        self.panel.push(
+            LvglSwitch::new("Switch-1", 670, 5)
+                .set_check(false)
+                .set_height(20)
+                .finalize(),
+        );
+
+        self.panel.push(
+            LvglSwitch::new("Switch-2", 600, 5)
+                .set_check(true)
+                .set_height(20)
                 .finalize(),
         );
 
@@ -135,11 +149,35 @@ impl DisplayHandle {
                 .finalize(),
         );
 
-        self.panel
-            .push(LvglButton::new("Button-B", "Test-2", 300, 200).finalize());
+        self.panel.push(
+            LvglButton::new("Button-B", "Test-2", 300, 200)
+                .set_info("push button 1")
+                .finalize(),
+        );
 
-        self.panel
-            .push(LvglArc::new("Arc", 10, 270, 800, 200).finalize());
+        self.panel.push(
+            LvglArc::new("Arc", 10, 270, 800, 150)
+                .set_info("Arc widget")
+                .finalize(),
+        );
+
+        self.panel.push(
+            LvglBar::new("Bar-1", 10, 90, 700, 300)
+                .set_info("variable bar")
+                .set_size(10,250)
+                .set_gradient(true, LvglColor::palette(LvglPalette::GREEN), LvglColor::palette(LvglPalette::YELLOW))
+                .set_value(60)
+                .finalize(),
+        );
+
+        self.panel.push(
+            LvglBar::new("Bar-2", 10, 90, 400, 300)
+                .set_info("variable bar")
+                .set_size(250,10)
+                .set_gradient(false, LvglColor::palette(LvglPalette::GREEN), LvglColor::palette(LvglPalette::YELLOW))
+                .set_value(40)
+                .finalize(),
+        );
 
         self.panel.push(
             LvglMeter::new(
@@ -148,9 +186,9 @@ impl DisplayHandle {
                 -10,
                 LvglColor::palette(LvglPalette::INDIGO),
                 800,
-                400,
+                350,
             )
-            .set_size(200,200)
+            .set_size(200, 200)
             .set_tic(
                 3,
                 10,
@@ -160,8 +198,8 @@ impl DisplayHandle {
                 LvglColor::palette(LvglPalette::BLUE_GREY),
                 LvglColor::palette(LvglPalette::GREY),
             )
-            .set_zone(0,20,4,LvglColor::palette(LvglPalette::RED))
-            .set_zone(80,100,4,LvglColor::palette(LvglPalette::GREEN))
+            .set_zone(0, 20, 4, LvglColor::palette(LvglPalette::RED))
+            .set_zone(80, 100, 4, LvglColor::palette(LvglPalette::GREEN))
             .set_border(4, LvglColor::palette(LvglPalette::LIGHT_BLUE))
             .set_background(LvglColor::palette(LvglPalette::PINK))
             .set_value(50)

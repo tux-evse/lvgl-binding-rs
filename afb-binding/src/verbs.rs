@@ -14,18 +14,38 @@ use crate::prelude::*;
 use afbv4::prelude::*;
 use lvgl_gui::prelude::*;
 
+macro_rules! verb_by_uid {
+    ($api: ident, $display:ident, $uid:literal, $widget:ty, $ctx_type: ident) => {
+        let widget = match $display.get_by_uid($uid).downcast_ref::<$widget>() {
+            Some(widget) => widget,
+            None => {
+                return Err(AfbError::new(
+                    "verb-info-widget",
+                    format!("no widget uid:{} type:{} found in panel", $uid, stringify!($widget)),
+                ))
+            }
+        };
+
+            let verb = AfbVerb::new(widget.get_uid())
+                .set_info(widget.get_info())
+                .set_action(widget.get_action())?
+                .set_callback(Box::new($ctx_type { widget }));
+
+            $api.add_verb(verb)
+    };
+}
+
 struct WidgetEvtCtx {
     event: &'static AfbEvent,
 }
 
 impl LvglHandler for WidgetEvtCtx {
     fn callback(&self, widget: &LvglWidget, uid: &'static str, event: &LvglEvent) {
-
         match widget {
             LvglWidget::Label(this) => {
                 println!("button:{} get event:{:?}", uid, event);
                 this.set_text("was pressed");
-                },
+            }
             _ => {}
         }
 
@@ -45,11 +65,11 @@ fn subscribe_evt_cb(
     args: &AfbData,
     ctx: &mut SubscribeEvtCtx,
 ) -> Result<(), AfbError> {
-    match args.get::<&ApiAction>(0)? {
-        ApiAction::SUBSCRIBE => {
+    match args.get::<&QuerySubscribe>(0)? {
+        QuerySubscribe::SUBSCRIBE => {
             ctx.event.subscribe(rqt)?;
         }
-        ApiAction::UNSUBSCRIBE => {
+        QuerySubscribe::UNSUBSCRIBE => {
             ctx.event.unsubscribe(rqt)?;
         }
     }
@@ -57,11 +77,11 @@ fn subscribe_evt_cb(
     Ok(())
 }
 
-struct InfoTextCtx {
+struct TextCtx {
     widget: &'static LvglTextArea,
 }
-AfbVerbRegister!(InfoVerb, info_verb_cb, InfoTextCtx);
-fn info_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut InfoTextCtx) -> Result<(), AfbError> {
+AfbVerbRegister!(InfoVerb, info_verb_cb, TextCtx);
+fn info_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut TextCtx) -> Result<(), AfbError> {
     let text = args.get::<String>(0)?;
     ctx.widget.set_text(text.as_str());
     rqt.reply(AFB_NO_DATA, 0);
@@ -79,6 +99,61 @@ fn meter_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut MeterCtx) -> Result
     Ok(())
 }
 
+struct ArcCtx {
+    widget: &'static LvglArc,
+}
+AfbVerbRegister!(ArcVerb, arc_verb_cb, ArcCtx);
+fn arc_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut ArcCtx) -> Result<(), AfbError> {
+    let value = args.get::<i32>(0)?;
+    ctx.widget.set_value(value);
+    rqt.reply(AFB_NO_DATA, 0);
+    Ok(())
+}
+
+struct BarCtx {
+    widget: &'static LvglBar,
+}
+AfbVerbRegister!(BarVerb, bar_verb_cb, BarCtx);
+fn bar_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut BarCtx) -> Result<(), AfbError> {
+    let value = args.get::<i32>(0)?;
+    ctx.widget.set_value(value);
+    rqt.reply(AFB_NO_DATA, 0);
+    Ok(())
+}
+
+struct SwitchCtx {
+    widget: &'static LvglSwitch,
+}
+AfbVerbRegister!(SwitchVerb, switch_verb_cb, SwitchCtx);
+fn switch_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut SwitchCtx) -> Result<(), AfbError> {
+    match args.get::<&QuerySwitch>(0)? {
+        QuerySwitch::ON => {
+            ctx.widget.set_check(true);
+        }
+        QuerySwitch::OFF => {
+            ctx.widget.set_check(false);
+        }
+    }
+    rqt.reply(AFB_NO_DATA, 0);
+    Ok(())
+}
+
+struct LedCtx {
+    widget: &'static LvglLed,
+}
+AfbVerbRegister!(LedVerb, led_verb_cb, LedCtx);
+fn led_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut LedCtx) -> Result<(), AfbError> {
+    match args.get::<&QuerySwitch>(0)? {
+        QuerySwitch::ON => {
+            ctx.widget.set_on(true);
+        }
+        QuerySwitch::OFF => {
+            ctx.widget.set_on(false);
+        }
+    }
+    rqt.reply(AFB_NO_DATA, 0);
+    Ok(())
+}
 
 pub(crate) fn register_verbs(
     api: &mut AfbApi,
@@ -99,46 +174,19 @@ pub(crate) fn register_verbs(
         .set_callback(Box::new(SubscribeEvtCtx { event }))
         .finalize()?;
 
-    let widget = match display
-        .get_by_uid("Text-Area")
-        .downcast_ref::<LvglTextArea>()
-    {
-        Some(widget) => widget,
-        None => {
-            return Err(AfbError::new(
-                "verb-info-widget",
-                "no 'Text-Area' widget found in panel".to_string(),
-            ))
-        }
-    };
-    let info = AfbVerb::new("set_info")
-        .set_info("change text info zone")
-        .set_callback(Box::new(InfoTextCtx { widget }))
-        .finalize()?;
+    // create and register widget verbs (Warning type mismatch is only detected at runtime)
+    verb_by_uid!(api, display, "Text-Area", LvglTextArea, TextCtx);
+    verb_by_uid!(api, display, "Meter", LvglMeter, MeterCtx);
+    verb_by_uid!(api, display, "Led-Green", LvglLed, LedCtx);
+    verb_by_uid!(api, display, "Led-Red", LvglLed, LedCtx);
+    verb_by_uid!(api, display, "Switch-1", LvglSwitch, SwitchCtx);
+    verb_by_uid!(api, display, "Switch-2", LvglSwitch, SwitchCtx);
+    verb_by_uid!(api, display, "Bar-1", LvglBar, BarCtx);
+    verb_by_uid!(api, display, "Bar-2", LvglBar, BarCtx);
+    verb_by_uid!(api, display, "Arc", LvglArc, ArcCtx);
 
-    let widget = match display
-        .get_by_uid("Meter")
-        .downcast_ref::<LvglMeter>()
-    {
-        Some(widget) => widget,
-        None => {
-            return Err(AfbError::new(
-                "verb-info-widget",
-                "no 'Meter' widget found in panel".to_string(),
-            ))
-        }
-    };
-    let meter = AfbVerb::new("set_meter")
-        .set_info("set meter value")
-        .set_callback(Box::new(MeterCtx { widget }))
-        .finalize()?;
-
-
-    // register veb and event
-    api.add_verb(subscribe);
-    api.add_verb(info);
-    api.add_verb(meter);
+    // register verb+event
     api.add_event(event);
-
+    api.add_verb(subscribe);
     Ok(())
 }

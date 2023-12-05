@@ -35,6 +35,7 @@ pub enum LvglEvent {
     FOCUSED,
     DEFOCUSED,
     LEAVE,
+    VALUE_CHANGED,
     UNKNOWN,
 }
 
@@ -52,6 +53,8 @@ impl LvglEvent {
             14 => Self::FOCUSED,
             15 => Self::DEFOCUSED,
             16 => Self::LEAVE,
+            28 => Self::VALUE_CHANGED,
+
             _ => Self::UNKNOWN,
         }
     }
@@ -66,6 +69,7 @@ pub trait LvglCommon {
     fn get_callback(&self) -> Option<*mut dyn LvglHandler>;
     fn finalize(&'static self) -> &'static LvglWidget;
     fn callback(&self, _event: &cglue::lv_event_t) {}
+    fn get_action(&self) -> &'static str{"[]"}
     fn set_callback(&'static self, ctrlbox: Option<*mut dyn LvglHandler>);
     fn set_info(&self, info: &'static str) -> &Self;
     fn as_any(&self) -> &dyn Any;

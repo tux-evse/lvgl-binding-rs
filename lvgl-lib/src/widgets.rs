@@ -34,6 +34,8 @@ pub enum LvglWidget {
     Image(&'static LvglImage),
     Arc(&'static LvglArc),
     Meter(&'static LvglMeter),
+    Switch(&'static LvglSwitch),
+    Bar(&'static LvglBar),
 }
 
 pub trait LvglHandler {
@@ -49,6 +51,8 @@ impl LvglWidget {
             LvglWidget::ImgButton(this) => this.callback(self, event),
             LvglWidget::Icon(this) => this.callback(self, event),
             LvglWidget::Image(this) => this.callback(self, event),
+            LvglWidget::Switch(this) => this.callback(self, event),
+            LvglWidget::Led(this) => this.callback(self, event),
             _ => {}
         }
     }
@@ -59,6 +63,8 @@ impl LvglWidget {
             LvglWidget::ImgButton(this) => this.set_callback(ctrlbox),
             LvglWidget::Icon(this) => this.set_callback(ctrlbox),
             LvglWidget::Image(this) => this.set_callback(ctrlbox),
+            LvglWidget::Switch(this) => this.set_callback(ctrlbox),
+            LvglWidget::Led(this) => this.set_callback(ctrlbox),
             _ => {}
         }
     }
@@ -75,6 +81,8 @@ impl LvglWidget {
             LvglWidget::Image(this) => this.as_any(),
             LvglWidget::Arc(this) => this.as_any(),
             LvglWidget::Meter(this) => this.as_any(),
+            LvglWidget::Switch(this) => this.as_any(),
+            LvglWidget::Bar(this) => this.as_any(),
         }
     }
 
@@ -90,6 +98,8 @@ impl LvglWidget {
             LvglWidget::Image(this) => this.get_uid(),
             LvglWidget::Arc(this) => this.get_uid(),
             LvglWidget::Meter(this) => this.get_uid(),
+            LvglWidget::Switch(this) => this.get_uid(),
+            LvglWidget::Bar(this) => this.get_uid(),
         }
     }
 }
@@ -399,12 +409,10 @@ impl LvglImage {
         if let Some(ctrlbox) = self.ctrlbox.get() {
             match event {
                 LvglEvent::PRESSED => {}
-                LvglEvent::CLICKED => {}
                 _ => return, // ignore other events
             }
             unsafe { (*ctrlbox).callback(widget, self.uid, event) };
         }
-        println!("LvgImage  uid:{} event:{:?}", self.uid, event);
     }
 }
 
@@ -500,6 +508,16 @@ impl LvglLed {
         }
     }
 
+    pub fn callback(&self, widget: &LvglWidget, event: &LvglEvent) {
+        if let Some(ctrlbox) = self.ctrlbox.get() {
+            match event {
+                LvglEvent::PRESSED => {}
+                _ => return, // ignore other events
+            }
+            unsafe { (*ctrlbox).callback(widget, self.uid, event) };
+        }
+    }
+
     pub fn set_color(&self, color: LvglColor) -> &Self {
         unsafe { cglue::lv_led_set_color(self.handle, color.handle) };
         self
@@ -508,6 +526,10 @@ impl LvglLed {
     pub fn set_brightness(&self, bright: u8) -> &Self {
         unsafe { cglue::lv_led_set_brightness(self.handle, bright) };
         self
+    }
+
+    pub fn get_action(&self) -> &'static str {
+        &"['ON','OFF']"
     }
 
     pub fn set_on(&self, status: bool) -> &Self {
@@ -637,9 +659,9 @@ impl LvglArc {
         self
     }
 
-    pub fn set_value(&self, value: i16) -> &Self {
+    pub fn set_value(&self, value: i32) -> &Self {
         unsafe {
-            cglue::lv_arc_set_value(self.handle, value);
+            cglue::lv_arc_set_value(self.handle, value as i16);
         }
         self
     }
@@ -785,5 +807,131 @@ impl LvglMeter {
             cglue::lv_meter_set_indicator_value(self.handle, self.needle, value);
         }
         self
+    }
+}
+
+pub struct LvglSwitch {
+    uid: &'static str,
+    info: Cell<&'static str>,
+    handle: *mut cglue::_lv_obj_t,
+    style: *mut cglue::lv_style_t,
+    ctrlbox: Cell<Option<*mut dyn LvglHandler>>,
+}
+impl_widget_trait!(LvglSwitch, Switch);
+impl LvglSwitch {
+    pub fn new(uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+        unsafe {
+            let handle = cglue::lv_switch_create(cglue::lv_scr_action());
+            cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
+            cglue::lv_obj_add_state(handle, cglue::LV_STATE_CHECKED as u16);
+
+            let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
+            cglue::lv_style_init(style);
+
+            // create widget object and set text text
+            let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
+            let widget = LvglSwitch {
+                uid,
+                info: Cell::new(""),
+                handle,
+                style,
+                ctrlbox: Cell::new(None),
+            };
+            Box::leak(Box::new(widget))
+        }
+    }
+
+    pub fn get_action(&self) -> &'static str {
+        &"['ON','OFF']"
+    }
+
+    pub fn set_check(&self, status: bool) -> &Self {
+        unsafe {
+            if status {
+                cglue::lv_obj_clear_state(self.handle, cglue::LV_STATE_DISABLED as u16);
+                cglue::lv_obj_add_state(self.handle, cglue::LV_STATE_CHECKED as u16);
+            } else {
+                cglue::lv_obj_clear_state(self.handle, cglue::LV_STATE_CHECKED as u16);
+                cglue::lv_obj_add_state(self.handle, cglue::LV_STATE_DISABLED as u16);
+            }
+        }
+        self
+    }
+    pub fn callback(&self, widget: &LvglWidget, event: &LvglEvent) {
+        if let Some(ctrlbox) = self.ctrlbox.get() {
+            match event {
+                LvglEvent::VALUE_CHANGED => {}
+                _ => return, // ignore other events
+            }
+            unsafe { (*ctrlbox).callback(widget, self.uid, event) };
+        }
+    }
+}
+
+pub struct LvglBar {
+    uid: &'static str,
+    info: Cell<&'static str>,
+    handle: *mut cglue::_lv_obj_t,
+    style: *mut cglue::lv_style_t,
+    ctrlbox: Cell<Option<*mut dyn LvglHandler>>,
+}
+impl_widget_trait!(LvglBar, Bar);
+impl LvglBar {
+    pub fn new(uid: &'static str, min: i32, max: i32, x_ofs: i16, y_ofs: i16) -> &'static Self {
+        unsafe {
+            let handle = cglue::lv_bar_create(cglue::lv_scr_action());
+            cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
+            cglue::lv_bar_set_range(handle, min, max);
+
+            let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
+            cglue::lv_style_init(style);
+
+            // create widget object and set text text
+            let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
+            let widget = LvglBar {
+                uid,
+                info: Cell::new(""),
+                handle,
+                style,
+                ctrlbox: Cell::new(None),
+            };
+            Box::leak(Box::new(widget))
+        }
+    }
+
+    pub fn set_gradient(&self, vertical: bool, color: LvglColor, background: LvglColor) -> &Self {
+        unsafe {
+            cglue::lv_style_set_bg_opa(self.style, cglue::LV_OPA_COVER as u8);
+            cglue::lv_style_set_bg_color(self.style, background.handle);
+            cglue::lv_style_set_bg_grad_color(self.style, color.handle);
+            if vertical {
+                cglue::lv_style_set_bg_grad_dir(self.style, cglue::LV_GRAD_DIR_VER as u8);
+            } else {
+                cglue::lv_style_set_bg_grad_dir(self.style, cglue::LV_GRAD_DIR_HOR as u8);
+            }
+            cglue::lv_obj_add_style(self.handle, self.style, cglue::LV_PART_INDICATOR);
+        }
+        self
+    }
+
+    pub fn set_value(&self, value: i32) -> &Self {
+        unsafe {
+            cglue::lv_bar_set_value(
+                self.handle,
+                value,
+                cglue::lv_anim_enable_t_LV_ANIM_OFF as u32,
+            );
+        }
+        self
+    }
+
+    pub fn callback(&self, widget: &LvglWidget, event: &LvglEvent) {
+        if let Some(ctrlbox) = self.ctrlbox.get() {
+            match event {
+                LvglEvent::VALUE_CHANGED => {}
+                _ => return, // ignore other events
+            }
+            unsafe { (*ctrlbox).callback(widget, self.uid, event) };
+        }
     }
 }
