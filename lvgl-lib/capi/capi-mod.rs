@@ -30,8 +30,9 @@ pub extern "C" fn lvgl_events_cb(event: *mut cglue::lv_event_t) {
     unsafe {
         let _widget = cglue::lv_event_get_target(event);
         let ctx = cglue::lv_event_get_user_data(event);
-        let event = &*(event as *mut cglue::lv_event_t);
+        let code = cglue::lv_event_get_code(event);
         let widget = &mut *(ctx as *mut LvglWidget);
-        widget.callback(event);
+
+        widget.callback(&LvglEvent::from(code));
     }
 }

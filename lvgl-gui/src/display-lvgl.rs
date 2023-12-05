@@ -16,6 +16,7 @@
  */
 
 use lvgl::prelude::*;
+use std::any::Any;
 
 pub struct DisplayHandle {
     handle: LvglHandle,
@@ -55,15 +56,17 @@ impl DisplayHandle {
         &self.panel
     }
 
-    pub fn get_by_uid(&self, uid: &str) -> Option<&'static LvglWidget> {
-        let widget = match self
+    pub fn get_by_uid(&self, uid: &str) -> &'static dyn Any {
+
+        match self
             .panel
             .binary_search_by(|widget| widget.get_uid().cmp(uid))
         {
-            Ok(index) => Some(self.panel[index]),
-            Err(_) => None,
-        };
-        widget
+            Ok(index) => {
+                self.panel[index].as_any()
+            },
+            Err(_) =>  &0 // return a dummy value
+        }
     }
 
     pub fn draw_panel(&mut self) -> &mut Self {
@@ -159,6 +162,8 @@ impl DisplayHandle {
             )
             .set_zone(0,20,4,LvglColor::palette(LvglPalette::RED))
             .set_zone(80,100,4,LvglColor::palette(LvglPalette::GREEN))
+            .set_border(4, LvglColor::palette(LvglPalette::LIGHT_BLUE))
+            .set_background(LvglColor::palette(LvglPalette::PINK))
             .set_value(50)
             .finalize(),
         );
@@ -178,7 +183,6 @@ impl DisplayHandle {
         // sort widget by uid and add them to pannel pool
         self.panel.sort_by(|a, b| a.get_uid().cmp(&b.get_uid()));
         for widget in &self.panel {
-            println!("widget uid={}", widget.get_uid());
             widget.set_callback(self.ctrlbox);
         }
         // start lvgl main loop thread

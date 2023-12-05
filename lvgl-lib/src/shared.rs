@@ -16,10 +16,46 @@
  */
 
 use crate::prelude::*;
-use std::ffi::CString;
+use std::any::Any;
 use std::mem;
 use std::os::raw;
 use std::{thread, time};
+
+#[derive(Clone, Debug)]
+#[allow(non_camel_case_types)]
+pub enum LvglEvent {
+    PRESSED,
+    PRESSING,
+    PRESS_LOST,
+    SHORT_CLICKED,
+    LONG_PRESSED,
+    LONG_PRESSED_REPEAT,
+    CLICKED,
+    RELEASED,
+    FOCUSED,
+    DEFOCUSED,
+    LEAVE,
+    UNKNOWN,
+}
+
+impl LvglEvent {
+    pub(crate) fn from(code: u32) -> Self {
+        match code {
+            1 => Self::PRESSED,
+            2 => Self::PRESSING,
+            3 => Self::PRESS_LOST,
+            4 => Self::SHORT_CLICKED,
+            5 => Self::LONG_PRESSED,
+            6 => Self::LONG_PRESSED_REPEAT,
+            7 => Self::CLICKED,
+            8 => Self::RELEASED,
+            14 => Self::FOCUSED,
+            15 => Self::DEFOCUSED,
+            16 => Self::LEAVE,
+            _ => Self::UNKNOWN,
+        }
+    }
+}
 
 pub trait LvglCommon {
     fn get_handle(&self) -> *mut cglue::lv_obj_t;
@@ -32,6 +68,7 @@ pub trait LvglCommon {
     fn callback(&self, _event: &cglue::lv_event_t) {}
     fn set_callback(&'static self, ctrlbox: Option<*mut dyn LvglHandler>);
     fn set_info(&self, info: &'static str) -> &Self;
+    fn as_any(&self) -> &dyn Any;
 }
 // common trait should be implemented for each widget because internal object struct is not identical
 #[macro_export]
@@ -60,12 +97,15 @@ macro_rules! impl_widget_trait {
             fn get_generic(&'static self) -> LvglWidget {
                 LvglWidget::$object(self)
             }
+            fn as_any(&self) -> &dyn Any {
+                self
+            }
             // if callback not set do it
             fn set_callback(&'static self, ctrlbox: Option<*mut dyn LvglHandler>) {
                 if let None = self.ctrlbox.get() {
                     match ctrlbox {
                         None => {}
-                        Some(_value) => {
+                        Some(_) => {
                             self.ctrlbox.set(ctrlbox);
                             let context = Box::leak(Box::new(LvglWidget::$object(self)));
                             unsafe {
@@ -185,20 +225,6 @@ pub trait LvglMethod {
         self
     }
 
-    fn set_text(&self, label: &str) -> &Self
-    where
-        Self: LvglCommon,
-    {
-        let handle = self.get_handle();
-        unsafe {
-            let text = match CString::new(label) {
-                Err(_) => CString::new("Non UTF8 label").unwrap(),
-                Ok(value) => value,
-            };
-            cglue::lv_label_set_text(handle, text.as_ptr());
-        }
-        self
-    }
 }
 
 pub struct LvglHandle {

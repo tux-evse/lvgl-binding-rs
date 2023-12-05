@@ -19,10 +19,19 @@ struct WidgetEvtCtx {
 }
 
 impl LvglHandler for WidgetEvtCtx {
-    fn callback(&self, uid: &'static str, event: u32) {
-        let info = format!("{{'uid':{}, 'event':{}}}", uid, event);
+    fn callback(&self, widget: &LvglWidget, uid: &'static str, event: &LvglEvent) {
+
+        match widget {
+            LvglWidget::Label(this) => {
+                println!("button:{} get event:{:?}", uid, event);
+                this.set_text("was pressed");
+                },
+            _ => {}
+        }
+
+        let info = format!("{{'uid':{}, 'event':{:?}}}", uid, event);
         println!("*** {} ***", info);
-        self.event.push(&info);
+        self.event.push(info);
     }
 }
 
@@ -49,7 +58,7 @@ fn subscribe_evt_cb(
 }
 
 struct InfoVerbCtx {
-    widget: &'static LvglWidget,
+    widget: &'static LvglTextArea,
 }
 AfbVerbRegister!(InfoVerb, info_verb_cb, InfoVerbCtx);
 fn info_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut InfoVerbCtx) -> Result<(), AfbError> {
@@ -63,7 +72,6 @@ pub(crate) fn register_verbs(
     api: &mut AfbApi,
     display: &mut DisplayHandle,
 ) -> Result<(), AfbError> {
-
     // global display API event
     let event = AfbEvent::new("widget");
 
@@ -79,8 +87,11 @@ pub(crate) fn register_verbs(
         .set_callback(Box::new(SubscribeEvtCtx { event }))
         .finalize()?;
 
-    let widget = match display.get_by_uid("Text-Area") {
-        Some(value) => value,
+    let widget = match display
+        .get_by_uid("Text-Area")
+        .downcast_ref::<LvglTextArea>()
+    {
+        Some(widget) => widget,
         None => {
             return Err(AfbError::new(
                 "verb-info-widget",
@@ -93,8 +104,10 @@ pub(crate) fn register_verbs(
         .set_callback(Box::new(InfoVerbCtx { widget }))
         .finalize()?;
 
+    // register veb and event
     api.add_verb(subscribe);
     api.add_verb(info);
+    api.add_event(event);
 
     Ok(())
 }

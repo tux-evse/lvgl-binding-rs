@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 use crate::impl_widget_trait;
+use std::any::Any;
 use std::cell::Cell;
 use std::ffi::CString;
 use std::mem;
@@ -36,18 +37,18 @@ pub enum LvglWidget {
 }
 
 pub trait LvglHandler {
-    fn callback(&self, uid: &'static str, code: u32);
+    fn callback(&self, widget: &LvglWidget, uid: &'static str, event: &LvglEvent);
 }
 
 // has we share C widget callback, we have to retrieve initial object for callback
 impl LvglWidget {
-    pub(crate) fn callback(&self, event: &cglue::lv_event_t) {
+    pub(crate) fn callback(&self, event: &LvglEvent) {
         match self {
-            LvglWidget::Label(this) => this.callback(event),
-            LvglWidget::Button(this) => this.callback(event),
-            LvglWidget::ImgButton(this) => this.callback(event),
-            LvglWidget::Icon(this) => this.callback(event),
-            LvglWidget::Image(this) => this.callback(event),
+            LvglWidget::Label(this) => this.callback(self, event),
+            LvglWidget::Button(this) => this.callback(self, event),
+            LvglWidget::ImgButton(this) => this.callback(self, event),
+            LvglWidget::Icon(this) => this.callback(self, event),
+            LvglWidget::Image(this) => this.callback(self, event),
             _ => {}
         }
     }
@@ -57,9 +58,26 @@ impl LvglWidget {
             LvglWidget::Button(this) => this.set_callback(ctrlbox),
             LvglWidget::ImgButton(this) => this.set_callback(ctrlbox),
             LvglWidget::Icon(this) => this.set_callback(ctrlbox),
+            LvglWidget::Image(this) => this.set_callback(ctrlbox),
             _ => {}
         }
     }
+
+    pub fn as_any(&self) -> &dyn Any {
+        match self {
+            LvglWidget::Label(this) => this.as_any(),
+            LvglWidget::Button(this) => this.as_any(),
+            LvglWidget::ImgButton(this) => this.as_any(),
+            LvglWidget::Icon(this) => this.as_any(),
+            LvglWidget::TextArea(this) => this.as_any(),
+            LvglWidget::Led(this) => this.as_any(),
+            LvglWidget::Line(this) => this.as_any(),
+            LvglWidget::Image(this) => this.as_any(),
+            LvglWidget::Arc(this) => this.as_any(),
+            LvglWidget::Meter(this) => this.as_any(),
+        }
+    }
+
     pub fn get_uid(&self) -> &'static str {
         match self {
             LvglWidget::Label(this) => this.get_uid(),
@@ -72,31 +90,6 @@ impl LvglWidget {
             LvglWidget::Image(this) => this.get_uid(),
             LvglWidget::Arc(this) => this.get_uid(),
             LvglWidget::Meter(this) => this.get_uid(),
-        }
-    }
-    pub fn get_info(&self) -> &'static str {
-        match self {
-            LvglWidget::Label(this) => this.get_info(),
-            LvglWidget::Button(this) => this.get_info(),
-            LvglWidget::ImgButton(this) => this.get_info(),
-            LvglWidget::Icon(this) => this.get_info(),
-            LvglWidget::TextArea(this) => this.get_info(),
-            LvglWidget::Led(this) => this.get_info(),
-            LvglWidget::Line(this) => this.get_info(),
-            LvglWidget::Image(this) => this.get_info(),
-            LvglWidget::Arc(this) => this.get_info(),
-            LvglWidget::Meter(this) => this.get_info(),
-        }
-    }
-    pub fn set_text(&self, text: &str) {
-        match self {
-            LvglWidget::Label(this) => {
-                this.set_text(text);
-            }
-            LvglWidget::TextArea(this) => {
-                this.set_text(text);
-            }
-            _ => {}
         }
     }
 }
@@ -162,15 +155,15 @@ impl LvglButton {
         self
     }
 
-    pub fn callback(&self, event: &cglue::lv_event_t) {
+    pub fn callback(&self, widget: &LvglWidget, event: &LvglEvent) {
         if let Some(ctrlbox) = self.ctrlbox.get() {
-            match event.code {
-                cglue::lv_event_code_t_LV_EVENT_PRESSED => {}
-                cglue::lv_event_code_t_LV_EVENT_CLICKED => {}
+            match event {
+                LvglEvent::PRESSED => {}
+                LvglEvent::CLICKED => {}
                 _ => return, // ignore other event
             }
-            println!("LvglButton  uid:{} code:{}", self.uid, event.code);
-            unsafe { (*ctrlbox).callback(self.uid, event.code) };
+            println!("LvglButton  uid:{} event:{:?}", self.uid, event);
+            unsafe { (*ctrlbox).callback(widget, self.uid, event) };
         }
     }
 }
@@ -259,14 +252,16 @@ impl LvglImgButton {
         }
     }
 
-    pub fn callback(&self, event: &cglue::lv_event_t) {
-        match event.code {
-            cglue::lv_event_code_t_LV_EVENT_DRAW_MAIN_BEGIN => {}
-            cglue::lv_event_code_t_LV_EVENT_PRESSED => {}
-            cglue::lv_event_code_t_LV_EVENT_CLICKED => {}
-            _ => return, // ignore other event
+    pub fn callback(&self, widget: &LvglWidget, event: &LvglEvent) {
+        if let Some(ctrlbox) = self.ctrlbox.get() {
+            match event {
+                LvglEvent::PRESSED => {}
+                LvglEvent::CLICKED => {}
+                _ => return, // ignore other event
+            }
+            unsafe { (*ctrlbox).callback(widget, self.uid, event) };
         }
-        println!("LvglImgButton uid:{} code:{}", self.uid, event.code);
+        println!("LvglImgButton uid:{} event:{:?}", self.uid, event);
     }
 }
 
@@ -302,15 +297,29 @@ impl LvglLabel {
             Box::leak(Box::new(widget))
         }
     }
-    pub fn callback(&self, event: &cglue::lv_event_t) {
-        match event.code {
-            //cglue::lv_event_code_t_LV_EVENT_DRAW_MAIN_BEGIN => {}
-            cglue::lv_event_code_t_LV_EVENT_DRAW_POST_END => {}
-            cglue::lv_event_code_t_LV_EVENT_PRESSED => {}
-            cglue::lv_event_code_t_LV_EVENT_CLICKED => {}
-            _ => return, // ignore other events
+
+    pub fn set_text(&self, label: &str) -> &Self {
+        unsafe {
+            let text = match CString::new(label) {
+                Err(_) => CString::new("Non UTF8 label").unwrap(),
+                Ok(value) => value,
+            };
+            cglue::lv_label_set_text(self.handle, text.as_ptr());
         }
-        println!("LvgLabel  uid:{} code:{}", self.uid, event.code);
+        self
+    }
+
+    pub fn callback(&self, widget: &LvglWidget, event: &LvglEvent) {
+        if let Some(ctrlbox) = self.ctrlbox.get() {
+            match event {
+                //cglue::lv_event_code_t_LV_EVENT_DRAW_MAIN_BEGIN => {}
+                LvglEvent::PRESSED => {}
+                LvglEvent::CLICKED => {}
+                _ => return, // ignore other events
+            }
+            unsafe { (*ctrlbox).callback(widget, self.uid, event) };
+        }
+        println!("LvgLabel  uid:{} event:{:?}", self.uid, event);
     }
 }
 
@@ -343,13 +352,16 @@ impl LvglIcon {
             Box::leak(Box::new(widget))
         }
     }
-    pub fn callback(&self, event: &cglue::lv_event_t) {
-        match event.code {
-            cglue::lv_event_code_t_LV_EVENT_PRESSED => {}
-            cglue::lv_event_code_t_LV_EVENT_CLICKED => {}
-            _ => return, // ignore other events
+    pub fn callback(&self, widget: &LvglWidget, event: &LvglEvent) {
+        if let Some(ctrlbox) = self.ctrlbox.get() {
+            match event {
+                LvglEvent::PRESSED => {}
+                LvglEvent::CLICKED => {}
+                _ => return, // ignore other events
+            }
+            unsafe { (*ctrlbox).callback(widget, self.uid, event) };
         }
-        println!("LvgIcon  uid:{} code:{}", self.uid, event.code);
+        println!("LvgIcon  uid:{} code:{:?}", self.uid, event);
     }
 }
 
@@ -387,13 +399,16 @@ impl LvglImage {
             Box::leak(Box::new(widget))
         }
     }
-    pub fn callback(&self, event: &cglue::lv_event_t) {
-        match event.code {
-            cglue::lv_event_code_t_LV_EVENT_PRESSED => {}
-            cglue::lv_event_code_t_LV_EVENT_CLICKED => {}
-            _ => return, // ignore other events
+    pub fn callback(&self, widget: &LvglWidget, event: &LvglEvent) {
+        if let Some(ctrlbox) = self.ctrlbox.get() {
+            match event {
+                LvglEvent::PRESSED => {}
+                LvglEvent::CLICKED => {}
+                _ => return, // ignore other events
+            }
+            unsafe { (*ctrlbox).callback(widget, self.uid, event) };
         }
-        println!("LvgImage  uid:{} code:{}", self.uid, event.code);
+        println!("LvgImage  uid:{} event:{:?}", self.uid, event);
     }
 }
 
