@@ -33,7 +33,30 @@ display-binding/afb-binding/etc/binding-test.sh
 ![LVGL demo api](Docs/lvgl-demo-api.png)
 
 
-4) Faire un screencast du framebuffer
+4) Rust LVGL api sample
+
+Check Display::draw_panel within display-lvgl.rs for more samples
+
+Create a label
+```Rust
+LvglLabel::new("Label-1", "Tux EvSe UI", 50, 400)
+            .set_info("Demo Label widget")
+            .set_size(300, 100)
+            .set_color(LvglColor::rvb(0, 0, 0))
+            .set_background(LvglColor::rvb(0xFF, 0xFF, 0xFF))
+            .set_border(3, LvglColor::rvb(0, 0xff, 0))
+            .finalize();
+```
+
+Create a button
+```Rust
+LvglButton::new("Button-A", "Test-1", 100, 200)
+    .set_info("Demo Button 1")
+    .set_size(180, 100)
+    .finalize();
+```
+
+5) Faire un screencast du framebuffer
 
 Copy framebuffer and transform it yo PNG. If needed crop image to content with gimp.
 ```
