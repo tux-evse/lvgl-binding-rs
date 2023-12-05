@@ -24,6 +24,20 @@ If your screen is repainted, then you are on /dev/fb0 other wise switch to next 
 display-binding/afb-binding/etc/binding-test.sh
 ```
 
-Fulup: TBD Finir le modèle ou
+## Demo screen on framebuffer
 
- Vérifier s'il serait possible de changer l'enum LvgWidget par un Dyn trait ?
+![LVGL demo screen](Docs/lvgl-demo-screen.png)
+
+## Demo afb-v4 API
+
+![LVGL demo api](Docs/lvgl-demo-api.png)
+
+
+4) Faire un screencast du framebuffer
+
+Copy framebuffer and transform it yo PNG. If needed crop image to content with gimp.
+```
+cp /dev/fb0 > /tmp/screen.data
+RESOLUTION="1920x1080"
+ffmpeg -vcodec rawvideo -f rawvideo -pix_fmt rgb32 -s $RESOLUTION -i /tmp/screen.data -f image2 -vcodec png screenshot.png
+```
