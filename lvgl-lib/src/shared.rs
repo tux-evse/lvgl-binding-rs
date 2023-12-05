@@ -232,8 +232,8 @@ impl LvglHandle {
             fbdev_handle.flush_cb = Some(cglue::fbdev_flush);
             fbdev_handle.hor_res = x_res;
             fbdev_handle.ver_res = y_res;
-            fbdev_handle.physical_hor_res = x_res;
-            fbdev_handle.physical_ver_res = y_res;
+            //fbdev_handle.physical_hor_res = x_res;
+            //fbdev_handle.physical_ver_res = y_res;
             cglue::lv_disp_drv_register(fbdev_handle);
 
             LvglHandle {

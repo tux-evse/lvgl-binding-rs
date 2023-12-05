@@ -31,6 +31,8 @@ pub enum LvglWidget {
     Led(&'static LvglLed),
     Line(&'static LvglLine),
     Image(&'static LvglImage),
+    Arc(&'static LvglArc),
+    Meter(&'static LvglMeter),
 }
 
 pub trait LvglHandler {
@@ -68,6 +70,8 @@ impl LvglWidget {
             LvglWidget::Led(this) => this.get_uid(),
             LvglWidget::Line(this) => this.get_uid(),
             LvglWidget::Image(this) => this.get_uid(),
+            LvglWidget::Arc(this) => this.get_uid(),
+            LvglWidget::Meter(this) => this.get_uid(),
         }
     }
     pub fn get_info(&self) -> &'static str {
@@ -80,6 +84,8 @@ impl LvglWidget {
             LvglWidget::Led(this) => this.get_info(),
             LvglWidget::Line(this) => this.get_info(),
             LvglWidget::Image(this) => this.get_info(),
+            LvglWidget::Arc(this) => this.get_info(),
+            LvglWidget::Meter(this) => this.get_info(),
         }
     }
     pub fn set_text(&self, text: &str) {
@@ -464,7 +470,6 @@ impl LvglLed {
     pub fn new(uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
             let handle = cglue::lv_led_create(cglue::lv_scr_action());
-            cglue::lv_obj_set_style_text_align(handle, cglue::LV_TEXT_ALIGN_CENTER as u8, 0);
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
             cglue::lv_led_off(handle);
 
@@ -518,13 +523,11 @@ impl LvglLine {
     pub fn new(uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
             let handle = cglue::lv_line_create(cglue::lv_scr_action());
-            cglue::lv_obj_set_style_text_align(handle, cglue::LV_TEXT_ALIGN_CENTER as u8, 0);
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
 
             let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
             cglue::lv_style_init(style);
             cglue::lv_obj_add_style(handle, style, 0);
-            cglue::lv_line_set_points(handle, &cglue::line_points as *const cglue::lv_point_t, 10);
 
             let widget = LvglLine {
                 uid,
@@ -537,12 +540,14 @@ impl LvglLine {
         }
     }
 
-    pub fn set_points(&self, points: &[LvglPoint]) -> &Self {
+    pub fn set_points(&self, points: Box<[LvglPoint]>) -> &Self {
+        let list = Box::leak(points);
+        let count = list.len();
         unsafe {
             cglue::lv_line_set_points(
                 self.handle,
-                points.as_ptr() as *const cglue::lv_point_t,
-                points.len() as u16,
+                list.as_ptr() as *const cglue::lv_point_t,
+                count as u16,
             );
         }
         self
@@ -568,10 +573,206 @@ impl LvglLine {
         };
         self
     }
+}
 
-    pub fn set_point(&self, line_points: &cglue::lv_point_t, num_points: u16) -> &Self {
-        unsafe { cglue::lv_line_set_points(self.handle, line_points, num_points) };
+pub struct LvglArc {
+    uid: &'static str,
+    info: Cell<&'static str>,
+    handle: *mut cglue::_lv_obj_t,
+    style: *mut cglue::lv_style_t,
+    ctrlbox: Cell<Option<*mut dyn LvglHandler>>,
+}
+impl_widget_trait!(LvglArc, Arc);
+impl LvglArc {
+    pub fn new(
+        uid: &'static str,
+        angle_start: u16,
+        angle_end: u16,
+        x_ofs: i16,
+        y_ofs: i16,
+    ) -> &'static Self {
+        unsafe {
+            let handle = cglue::lv_arc_create(cglue::lv_scr_action());
+            cglue::lv_arc_set_bg_angles(handle, angle_start, angle_end);
+            cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
+            cglue::lv_obj_clear_flag(handle, cglue::LV_OBJ_FLAG_CLICKABLE);
 
+            let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
+            cglue::lv_style_init(style);
+            cglue::lv_obj_add_style(handle, style, 0);
+
+            let widget = LvglArc {
+                uid,
+                info: Cell::new(""),
+                handle,
+                style,
+                ctrlbox: Cell::new(None),
+            };
+            Box::leak(Box::new(widget))
+        }
+    }
+
+    pub fn set_rotation(&self, angle: u16) -> &Self {
+        unsafe {
+            cglue::lv_arc_set_rotation(self.handle, angle);
+        }
+        self
+    }
+
+    pub fn set_range(&self, min: i16, max: i16) -> &Self {
+        unsafe {
+            cglue::lv_arc_set_range(self.handle, min, max);
+        }
+        self
+    }
+
+    pub fn set_value(&self, value: i16) -> &Self {
+        unsafe {
+            cglue::lv_arc_set_value(self.handle, value);
+        }
+        self
+    }
+
+    pub fn remove_knob(&self) -> &Self {
+        unsafe {
+            cglue::lv_obj_remove_style(
+                self.handle,
+                0 as *mut cglue::lv_style_t,
+                cglue::LV_PART_KNOB,
+            );
+        }
+        self
+    }
+
+    pub fn set_width(&self, width: i16) -> &Self {
+        unsafe {
+            cglue::lv_style_set_arc_width(self.style, width);
+        }
+        self
+    }
+
+    pub fn set_color(&self, color: LvglColor) -> &Self {
+        unsafe {
+            cglue::lv_style_set_arc_color(self.style, color.handle);
+        };
+        self
+    }
+
+    pub fn set_rounded(&self, value: bool) -> &Self {
+        unsafe {
+            cglue::lv_style_set_arc_rounded(self.style, value);
+        };
+        self
+    }
+}
+
+pub struct LvglMeter {
+    uid: &'static str,
+    info: Cell<&'static str>,
+    handle: *mut cglue::_lv_obj_t,
+    style: *mut cglue::lv_style_t,
+    scale: *mut cglue::lv_meter_scale_t,
+    needle: *mut cglue::lv_meter_indicator_t,
+    ctrlbox: Cell<Option<*mut dyn LvglHandler>>,
+}
+impl_widget_trait!(LvglMeter, Meter);
+impl LvglMeter {
+    pub fn new(
+        uid: &'static str,
+        needle_width: u16,
+        needle_ratio: i16,
+        needle_color: LvglColor,
+        x_ofs: i16,
+        y_ofs: i16,
+    ) -> &'static Self {
+        unsafe {
+            let handle = cglue::lv_meter_create(cglue::lv_scr_action());
+            cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
+
+            // add scale
+            let scale = cglue::lv_meter_add_scale(handle);
+
+            // add needel
+            let needle = cglue::lv_meter_add_needle_line(
+                handle,
+                scale,
+                needle_width,
+                needle_color.handle,
+                needle_ratio,
+            );
+
+            let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
+            cglue::lv_style_init(style);
+            cglue::lv_obj_add_style(handle, style, 0);
+
+            let widget = LvglMeter {
+                uid,
+                info: Cell::new(""),
+                handle,
+                scale,
+                needle,
+                style,
+                ctrlbox: Cell::new(None),
+            };
+            Box::leak(Box::new(widget))
+        }
+    }
+
+    pub fn set_tic(
+        &self,
+        line_width: u16,
+        label_gap: i16, // gap text to tick
+        tick_count: u16,
+        tick_length: u16,
+        nth_major: u16, // number of tick to major
+        minor_color: LvglColor,
+        major_color: LvglColor,
+    ) -> &Self {
+        unsafe {
+            cglue::lv_meter_set_scale_ticks(
+                self.handle,
+                self.scale,
+                tick_count,
+                line_width,
+                tick_length,
+                minor_color.handle,
+            );
+            cglue::lv_meter_set_scale_major_ticks(
+                self.handle,
+                self.scale,
+                nth_major,
+                (line_width as f32 * 1.5) as u16,
+                (tick_length as f32 * 1.5) as u16,
+                major_color.handle,
+                label_gap,
+            );
+        }
+        self
+    }
+
+    pub fn set_zone(&self, start: i32, end: i32, width: u16, color: LvglColor) -> &Self {
+        unsafe {
+            let indic = cglue::lv_meter_add_arc(self.handle, self.scale, width, color.handle, 0);
+            cglue::lv_meter_set_indicator_start_value(self.handle, indic, start);
+            cglue::lv_meter_set_indicator_end_value(self.handle, indic, end);
+            let indic = cglue::lv_meter_add_scale_lines(
+                self.handle,
+                self.scale,
+                color.handle,
+                color.handle,
+                false,
+                0,
+            );
+            cglue::lv_meter_set_indicator_start_value(self.handle, indic, start);
+            cglue::lv_meter_set_indicator_end_value(self.handle, indic, end);
+        }
+        self
+    }
+
+    pub fn set_value(&self, value: i32) -> &Self {
+        unsafe {
+            cglue::lv_meter_set_indicator_value(self.handle, self.needle, value);
+        }
         self
     }
 }

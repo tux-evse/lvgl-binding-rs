@@ -85,23 +85,15 @@ impl DisplayHandle {
 
         self.panel.push(
             LvglIcon::new("Icon-Nfc", LvglPixmap::SD_CARD, 950, 0)
-                .set_color(LvglColor::rvb(255,0,0))
+                .set_color(LvglColor::rvb(255, 0, 0))
                 .finalize(),
         );
 
-        self.panel.push(
-            LvglIcon::new("Icon-Battery", LvglPixmap::BATTERY_2, 900, 0)
-                .finalize(),
-        );
+        self.panel
+            .push(LvglIcon::new("Icon-Battery", LvglPixmap::BATTERY_2, 900, 0).finalize());
 
         self.panel.push(
-            LvglIcon::new("Icon-Battery", LvglPixmap::BATTERY_2, 850, 0)
-                .set_size(75, 75)
-                .finalize(),
-        );
-
-        self.panel.push(
-            LvglLed::new("Led-Red", 650, 5)
+            LvglLed::new("Led-Red", 850, 5)
                 .set_color(LvglColor::palette(LvglPalette::RED))
                 .set_size(10, 10)
                 .set_on(true)
@@ -109,26 +101,27 @@ impl DisplayHandle {
         );
 
         self.panel.push(
-            LvglLed::new("Led-Green", 630, 5)
+            LvglLed::new("Led-Green", 800, 5)
                 .set_color(LvglColor::rvb(0, 255, 0))
                 .set_brightness(255)
                 .set_size(10, 10)
                 .set_on(true)
                 .finalize(),
         );
+
         let points = [
             LvglPoint { x: 5, y: 5 },
             LvglPoint { x: 70, y: 70 },
-            LvglPoint { x: 120, y: 100 },
+            LvglPoint { x: 120, y: 10 },
             LvglPoint { x: 180, y: 60 },
             LvglPoint { x: 240, y: 10 },
         ];
         self.panel.push(
-            LvglLine::new("Line", 10, 300)
-                .set_color(LvglColor::rvb(255, 40, 100))
+            LvglLine::new("Line", 400, 100)
+                .set_color(LvglColor::palette(LvglPalette::RED))
                 .set_width(8)
                 .set_rounded(true)
-                .set_points(&points)
+                .set_points(Box::new(points))
                 .finalize(),
         );
 
@@ -140,20 +133,33 @@ impl DisplayHandle {
         );
 
         self.panel
-            .push(LvglButton::new("button-B", "Test-2", 300, 200).finalize());
+            .push(LvglButton::new("Button-B", "Test-2", 300, 200).finalize());
+
+        self.panel
+            .push(LvglArc::new("Arc", 10, 270, 800, 200).finalize());
 
         self.panel.push(
-            LvglImgButton::new(
-                "btn_img",
-                "waiting",
-                500,
+            LvglMeter::new(
+                "Meter",
+                4,
+                -10,
+                LvglColor::palette(LvglPalette::INDIGO),
+                800,
                 400,
-                LvglColor::palette(LvglPalette::BLUE_GREY),
-                5,
-                10,
             )
-            .set_info("Demo Image Button")
-            .set_size(180, 100)
+            .set_size(200,200)
+            .set_tic(
+                3,
+                10,
+                41,
+                10,
+                8,
+                LvglColor::palette(LvglPalette::BLUE_GREY),
+                LvglColor::palette(LvglPalette::GREY),
+            )
+            .set_zone(0,20,4,LvglColor::palette(LvglPalette::RED))
+            .set_zone(80,100,4,LvglColor::palette(LvglPalette::GREEN))
+            .set_value(50)
             .finalize(),
         );
 
@@ -172,9 +178,10 @@ impl DisplayHandle {
         // sort widget by uid and add them to pannel pool
         self.panel.sort_by(|a, b| a.get_uid().cmp(&b.get_uid()));
         for widget in &self.panel {
+            println!("widget uid={}", widget.get_uid());
             widget.set_callback(self.ctrlbox);
         }
-
-        self.handle.start_loop(); // start refresh thread
+        // start lvgl main loop thread
+        self.handle.start_loop();
     }
 }

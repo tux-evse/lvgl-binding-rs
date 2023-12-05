@@ -1,6 +1,9 @@
 # lvgl-binding-rs
 Embedded graphic lvgl Rust afb-v4 binding
 
+## reference:
+https://docs.lvgl.io/8/widgets/index.html
+
 ## testing without root privilege
 
 1) In order to test without admin privileges, you need access to

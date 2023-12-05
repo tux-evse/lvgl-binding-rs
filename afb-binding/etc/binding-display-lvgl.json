@@ -16,7 +16,7 @@
             "display": {
                 "x_res": 1024,
                 "y_res": 600,
-                "ration": 1
+                "ratio": 1
             }
         }
     ]

@@ -78,7 +78,7 @@ pub fn binding_init(rootv4: AfbApiV4, jconf: JsoncObj) -> Result<&'static AfbApi
     let mut display = if let Ok(jvalue) = jconf.get::<JsoncObj>("display") {
         let x_res = jvalue.get::<u32>("x_res")? as i16;
         let y_res = jvalue.get::<u32>("y_res")? as i16;
-        let ratio = jvalue.get::<u32>("ration")?;
+        let ratio = jvalue.get::<u32>("ratio")?;
 
         DisplayHandle::create(x_res, y_res, ratio)
     } else {

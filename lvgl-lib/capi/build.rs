@@ -59,6 +59,8 @@ fn main() {
         .allowlist_item("lv_led_.*")
         .allowlist_item("lv_line_.*")
         .allowlist_item("line_.*")
+        .allowlist_item("lv_arc_.*")
+        .allowlist_item("lv_meter_.*")
 
 
         .generate()
