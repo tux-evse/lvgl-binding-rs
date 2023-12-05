@@ -159,10 +159,9 @@ impl LvglButton {
         if let Some(ctrlbox) = self.ctrlbox.get() {
             match event {
                 LvglEvent::PRESSED => {}
-                LvglEvent::CLICKED => {}
+                //LvglEvent::CLICKED => {}
                 _ => return, // ignore other event
             }
-            println!("LvglButton  uid:{} event:{:?}", self.uid, event);
             unsafe { (*ctrlbox).callback(widget, self.uid, event) };
         }
     }
@@ -256,12 +255,11 @@ impl LvglImgButton {
         if let Some(ctrlbox) = self.ctrlbox.get() {
             match event {
                 LvglEvent::PRESSED => {}
-                LvglEvent::CLICKED => {}
+                //LvglEvent::CLICKED => {}
                 _ => return, // ignore other event
             }
             unsafe { (*ctrlbox).callback(widget, self.uid, event) };
         }
-        println!("LvglImgButton uid:{} event:{:?}", self.uid, event);
     }
 }
 
@@ -314,12 +312,11 @@ impl LvglLabel {
             match event {
                 //cglue::lv_event_code_t_LV_EVENT_DRAW_MAIN_BEGIN => {}
                 LvglEvent::PRESSED => {}
-                LvglEvent::CLICKED => {}
+                //LvglEvent::CLICKED => {}
                 _ => return, // ignore other events
             }
             unsafe { (*ctrlbox).callback(widget, self.uid, event) };
         }
-        println!("LvgLabel  uid:{} event:{:?}", self.uid, event);
     }
 }
 
@@ -356,12 +353,11 @@ impl LvglIcon {
         if let Some(ctrlbox) = self.ctrlbox.get() {
             match event {
                 LvglEvent::PRESSED => {}
-                LvglEvent::CLICKED => {}
+                //LvglEvent::CLICKED => {}
                 _ => return, // ignore other events
             }
             unsafe { (*ctrlbox).callback(widget, self.uid, event) };
         }
-        println!("LvgIcon  uid:{} code:{:?}", self.uid, event);
     }
 }
 

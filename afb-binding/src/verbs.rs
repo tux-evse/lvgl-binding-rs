@@ -57,16 +57,28 @@ fn subscribe_evt_cb(
     Ok(())
 }
 
-struct InfoVerbCtx {
+struct InfoTextCtx {
     widget: &'static LvglTextArea,
 }
-AfbVerbRegister!(InfoVerb, info_verb_cb, InfoVerbCtx);
-fn info_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut InfoVerbCtx) -> Result<(), AfbError> {
+AfbVerbRegister!(InfoVerb, info_verb_cb, InfoTextCtx);
+fn info_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut InfoTextCtx) -> Result<(), AfbError> {
     let text = args.get::<String>(0)?;
     ctx.widget.set_text(text.as_str());
     rqt.reply(AFB_NO_DATA, 0);
     Ok(())
 }
+
+struct MeterCtx {
+    widget: &'static LvglMeter,
+}
+AfbVerbRegister!(MeterVerb, meter_verb_cb, MeterCtx);
+fn meter_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut MeterCtx) -> Result<(), AfbError> {
+    let value = args.get::<i32>(0)?;
+    ctx.widget.set_value(value);
+    rqt.reply(AFB_NO_DATA, 0);
+    Ok(())
+}
+
 
 pub(crate) fn register_verbs(
     api: &mut AfbApi,
@@ -101,12 +113,31 @@ pub(crate) fn register_verbs(
     };
     let info = AfbVerb::new("set_info")
         .set_info("change text info zone")
-        .set_callback(Box::new(InfoVerbCtx { widget }))
+        .set_callback(Box::new(InfoTextCtx { widget }))
         .finalize()?;
+
+    let widget = match display
+        .get_by_uid("Meter")
+        .downcast_ref::<LvglMeter>()
+    {
+        Some(widget) => widget,
+        None => {
+            return Err(AfbError::new(
+                "verb-info-widget",
+                "no 'Meter' widget found in panel".to_string(),
+            ))
+        }
+    };
+    let meter = AfbVerb::new("set_meter")
+        .set_info("set meter value")
+        .set_callback(Box::new(MeterCtx { widget }))
+        .finalize()?;
+
 
     // register veb and event
     api.add_verb(subscribe);
     api.add_verb(info);
+    api.add_verb(meter);
     api.add_event(event);
 
     Ok(())

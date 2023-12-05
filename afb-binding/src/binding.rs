@@ -21,7 +21,7 @@ pub(crate) fn to_static_str(value: String) -> &'static str {
 AfbDataConverter!(api_actions, ApiAction);
 use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, Default)]
-#[serde(rename_all = "lowercase", tag = "action")]
+#[serde(tag = "action")]
 pub(crate) enum ApiAction {
     #[default]
     SUBSCRIBE,
