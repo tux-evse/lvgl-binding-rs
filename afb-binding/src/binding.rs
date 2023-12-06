@@ -37,7 +37,6 @@ pub(crate) enum QuerySwitch {
     OFF,
 }
 
-
 fn json_to_color(jcolor: JsoncObj) -> Result<LvglColor, AfbError> {
     let red = jcolor.get::<u32>("red")?;
     let blue = jcolor.get::<u32>("blue")?;
@@ -86,22 +85,37 @@ pub fn binding_init(rootv4: AfbApiV4, jconf: JsoncObj) -> Result<&'static AfbApi
         AfbPermission::new("acl:display:client")
     };
 
-    let mut display = if let Ok(jvalue) = jconf.get::<JsoncObj>("display") {
-        let x_res = jvalue.get::<u32>("x_res")? as i16;
-        let y_res = jvalue.get::<u32>("y_res")? as i16;
-        let ratio = jvalue.get::<u32>("ratio")?;
+    let mut display = match jconf.get::<JsoncObj>("display") {
+        Ok(jvalue) => {
+            let toto = jvalue.get::<JsoncObj>("x_res")?;
+            let snoopt = toto.get_type();
+            println!(
+                "display={} toto:{} type:{:?}",
+                jvalue,
+                toto,
+                toto.get_type()
+            );
+            // let x_res = jvalue.get::<u32>("x_res")?;
+            // let y_res = jvalue.get::<u32>("y_res")?;
+            // let ratio = jvalue.get::<u32>("ratio")?;
 
-        DisplayHandle::create(x_res, y_res, ratio)
-    } else {
-        return Err(AfbError::new(
-            "display-config-fail",
-            "mandatory 'display' config missing",
-        ));
+            let x_res = 1024;
+            let y_res = 600;
+            let ratio = 1;
+
+            DisplayHandle::create(x_res as i16, y_res as i16, ratio)
+        }
+        Err(_error) => {
+            return Err(AfbError::new(
+                "display-config-fail",
+                "mandatory 'display' config missing",
+            ));
+        }
     };
 
     if let Ok(mut value) = jconf.get::<String>("logo") {
-        value.insert_str(0,"L:");
-        LvglImage::new("tux-evse", value.as_str(),0,0);
+        value.insert_str(0, "L:");
+        LvglImage::new("tux-evse", value.as_str(), 0, 0);
     }
 
     // check theme and provide default if needed

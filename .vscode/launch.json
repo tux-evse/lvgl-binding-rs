@@ -17,7 +17,7 @@
                 "-v",
                 "--monitoring",
                 "--trap-faults=0",
-                "--config=afb-binding/etc/binding-display-lvgl.json",
+                "--config=afb-binding/etc/binding-native-lvgl.json",
             ],
             "cwd": "${workspaceFolder}",
             "initCommands": [

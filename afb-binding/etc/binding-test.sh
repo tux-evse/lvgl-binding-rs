@@ -6,7 +6,7 @@ export PATH="/usr/local/lib64:$PATH"
 clear
 ulimit -c 0 # no core dump
 
-if ! test -f $CARGO_TARGET_DIR/debug/libafb_display.so; then
+if ! test -f $CARGO_TARGET_DIR/debug/libafb_lvgl.so; then
     echo "FATAL: missing libafb_lvgl.so use: cargo build"
     exit 1
 fi
@@ -31,4 +31,4 @@ if test -n "$PERMISION_ADM"; then
 fi
 
 # start binder with test config
-afb-binder --trap-faults=no -v --config=afb-binding/etc/binding-display-lvgl.json
+afb-binder --trap-faults=no -v --config=afb-binding/etc/binding-native-lvgl.json

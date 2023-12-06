@@ -23,6 +23,10 @@
 #include "lv_drivers/display/fbdev.h"
 #include "lv_drivers/indev/evdev.h"
 
+#if USE_GTK
+#include "lv_drivers/gtkdrv/gtkdrv.h"
+#endif
+
 #include "../assets/button_left.c"
 #include "../assets/button_mid.c"
 #include "../assets/button_right.c"

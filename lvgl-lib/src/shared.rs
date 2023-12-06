@@ -69,7 +69,9 @@ pub trait LvglCommon {
     fn get_callback(&self) -> Option<*mut dyn LvglHandler>;
     fn finalize(&'static self) -> &'static LvglWidget;
     fn callback(&self, _event: &cglue::lv_event_t) {}
-    fn get_action(&self) -> &'static str{"[]"}
+    fn get_action(&self) -> &'static str {
+        "[]"
+    }
     fn set_callback(&'static self, ctrlbox: Option<*mut dyn LvglHandler>);
     fn set_info(&self, info: &'static str) -> &Self;
     fn as_any(&self) -> &dyn Any;
@@ -228,19 +230,27 @@ pub trait LvglMethod {
         }
         self
     }
-
 }
 
 pub struct LvglHandle {
-    _fbdev_handle: &'static cglue::lv_disp_drv_t,
+    _disp_handle: *mut cglue::lv_disp_drv_t,
+    _mouse_handle: *mut cglue::lv_indev_t,
 }
 
 impl LvglHandle {
     pub fn new(x_res: i16, y_res: i16, draw_ratio: u32) -> Self {
         unsafe {
             cglue::lv_init();
-            cglue::fbdev_init();
-            cglue::evdev_init();
+
+            #[cfg(not(use_gtk))]
+            {
+                cglue::fbdev_init();
+                cglue::evdev_init();
+            }
+            #[cfg(use_gtk)]
+            {
+                cglue::gtkdrv_init();
+            }
 
             // drawing buffer that can be smaller than screen definition
             let buffer_sz = x_res as u32 * y_res as u32 / draw_ratio;
@@ -256,18 +266,37 @@ impl LvglHandle {
             );
 
             // frame buffer driver handle
-            let fbdev_handle = Box::leak(Box::new(mem::zeroed::<cglue::lv_disp_drv_t>()));
-            cglue::lv_disp_drv_init(fbdev_handle);
-            fbdev_handle.draw_buf = draw_buffer;
-            fbdev_handle.flush_cb = Some(cglue::fbdev_flush);
-            fbdev_handle.hor_res = x_res;
-            fbdev_handle.ver_res = y_res;
-            //fbdev_handle.physical_hor_res = x_res;
-            //fbdev_handle.physical_ver_res = y_res;
-            cglue::lv_disp_drv_register(fbdev_handle);
+            let disp_handle = Box::leak(Box::new(mem::zeroed::<cglue::lv_disp_drv_t>()));
+            cglue::lv_disp_drv_init(disp_handle);
+            disp_handle.draw_buf = draw_buffer;
+            disp_handle.hor_res = x_res;
+            disp_handle.ver_res = y_res;
+            //disp_handle.physical_hor_res = x_res;
+            //disp_handle.physical_ver_res = y_res;
+
+            #[cfg(not(use_gtk))] {
+                disp_handle.flush_cb = Some(cglue::fbdev_flush);
+            }
+
+            #[cfg(use_gtk)] {
+                println!("--- GTK frame-buffer simulator selected ---");
+                disp_handle.flush_cb = Some(cglue::gtkdrv_flush_cb);
+            }
+            cglue::lv_disp_drv_register(disp_handle);
+
+
+            // input event handler
+            let indev_handle = Box::leak(Box::new(mem::zeroed::<cglue::lv_indev_drv_t>()));
+            indev_handle.type_ = cglue::lv_indev_type_t_LV_INDEV_TYPE_POINTER;
+
+            #[cfg(not(use_gtk))] {
+                indev_handle.read_cb = Some(cglue::evdev_read);
+            }
+            let mouse_handle = cglue::lv_indev_drv_register(indev_handle);
 
             LvglHandle {
-                _fbdev_handle: fbdev_handle,
+                _disp_handle: disp_handle,
+                _mouse_handle: mouse_handle,
             }
         }
     }
@@ -292,18 +321,12 @@ impl LvglHandle {
                 font as *const _ as *const cglue::lv_font_t,
             );
             cglue::lv_disp_set_theme(display as *mut cglue::_lv_disp_t, theme);
-
-            // input event handler
-            let indev_handle = Box::leak(Box::new(mem::zeroed::<cglue::lv_indev_drv_t>()));
-            indev_handle.type_ = cglue::lv_indev_type_t_LV_INDEV_TYPE_POINTER;
-            indev_handle.read_cb = Some(cglue::evdev_read);
-            let mouse_handle = cglue::lv_indev_drv_register(indev_handle);
             let cursor_handle = cglue::lv_img_create(cglue::lv_scr_action());
             cglue::lv_img_set_src(
                 cursor_handle,
                 &cglue::lv_mouse_cursor as *const _ as *const raw::c_void,
             );
-            cglue::lv_indev_set_cursor(mouse_handle, cursor_handle);
+            cglue::lv_indev_set_cursor(self._mouse_handle, cursor_handle);
         }
         self
     }

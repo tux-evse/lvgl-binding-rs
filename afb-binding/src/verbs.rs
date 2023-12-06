@@ -173,6 +173,7 @@ pub(crate) fn register_verbs(
         .set_action("['SUBSCRIBE','UNSUBSCRIBE']")?
         .set_callback(Box::new(SubscribeEvtCtx { event }))
         .finalize()?;
+    api.add_verb(subscribe);
 
     // create and register widget verbs (Warning type mismatch is only detected at runtime)
     verb_by_uid!(api, display, "Text-Area", LvglTextArea, TextCtx);
@@ -187,6 +188,5 @@ pub(crate) fn register_verbs(
 
     // register verb+event
     api.add_event(event);
-    api.add_verb(subscribe);
     Ok(())
 }
