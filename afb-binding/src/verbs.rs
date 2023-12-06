@@ -175,7 +175,7 @@ pub(crate) fn register_verbs(
         .finalize()?;
     api.add_verb(subscribe);
 
-    // create and register widget verbs (Warning type mismatch is only detected at runtime)
+    //create and register widget verbs (Warning type mismatch is only detected at runtime)
     verb_by_uid!(api, display, "Text-Area", LvglTextArea, TextCtx);
     verb_by_uid!(api, display, "Meter", LvglMeter, MeterCtx);
     verb_by_uid!(api, display, "Led-Green", LvglLed, LedCtx);

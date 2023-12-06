@@ -292,6 +292,11 @@ impl LvglHandle {
             #[cfg(not(use_gtk))] {
                 indev_handle.read_cb = Some(cglue::evdev_read);
             }
+            #[cfg(use_gtk)] {
+                indev_handle.read_cb = Some(cglue::gtkdrv_mouse_read_cb);
+            }
+
+
             let mouse_handle = cglue::lv_indev_drv_register(indev_handle);
 
             LvglHandle {

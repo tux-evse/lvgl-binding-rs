@@ -16,12 +16,13 @@
  */
 
 #define LV_CONF_INCLUDE_SIMPLE 1
-#define USE_FBDEV 1
-#define USE_EVDEV 1
 
 #include "lvgl/lvgl.h"
+
+#ifdef USE_FBDEV
 #include "lv_drivers/display/fbdev.h"
 #include "lv_drivers/indev/evdev.h"
+#endif
 
 #if USE_GTK
 #include "lv_drivers/gtkdrv/gtkdrv.h"

@@ -87,21 +87,9 @@ pub fn binding_init(rootv4: AfbApiV4, jconf: JsoncObj) -> Result<&'static AfbApi
 
     let mut display = match jconf.get::<JsoncObj>("display") {
         Ok(jvalue) => {
-            let toto = jvalue.get::<JsoncObj>("x_res")?;
-            let snoopt = toto.get_type();
-            println!(
-                "display={} toto:{} type:{:?}",
-                jvalue,
-                toto,
-                toto.get_type()
-            );
-            // let x_res = jvalue.get::<u32>("x_res")?;
-            // let y_res = jvalue.get::<u32>("y_res")?;
-            // let ratio = jvalue.get::<u32>("ratio")?;
-
-            let x_res = 1024;
-            let y_res = 600;
-            let ratio = 1;
+            let x_res = jvalue.get::<u32>("x_res")?;
+            let y_res = jvalue.get::<u32>("y_res")?;
+            let ratio = jvalue.get::<u32>("ratio")?;
 
             DisplayHandle::create(x_res as i16, y_res as i16, ratio)
         }
@@ -133,10 +121,10 @@ pub fn binding_init(rootv4: AfbApiV4, jconf: JsoncObj) -> Result<&'static AfbApi
 
     // create backend API
     let api = AfbApi::new(api).set_info(info).set_permission(permission);
-    register_verbs(api, &mut display)?;
+    register_verbs(api , &mut display)?;
 
     // lock config in ram to avoid lvgl to free memory
-    Box::leak(Box::new(display));
+    //Box::leak(Box::new(display));
 
     Ok(api.finalize()?)
 }

@@ -9,9 +9,7 @@
 
 fn main() {
     println!("cargo:rustc-link-search=/usr/local/lib64");
+    println!("cargo:rustc-link-arg=-ljson-c");
     println!("cargo:rustc-link-arg=-llvgl");
     println!("cargo:rustc-link-arg=-llv_drivers");
-
-    //println!("cargo:rustc-link-arg=-lgtk-3");
-
 }
