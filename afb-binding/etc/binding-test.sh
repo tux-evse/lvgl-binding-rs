@@ -1,9 +1,13 @@
 #!/bin/bash
 
+# move to projet base to get relative path to logo image
+DIR=`dirname $0`
+cd $DIR/../..
+
 # use libafb development version if any
 export LD_LIBRARY_PATH="/usr/local/lib64:$LD_LIBRARY_PATH"
 export PATH="/usr/local/lib64:$PATH"
-clear
+#clear
 ulimit -c 0 # no core dump
 
 if ! test -f $CARGO_TARGET_DIR/debug/libafb_lvgl.so; then

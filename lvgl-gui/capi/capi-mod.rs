@@ -15,24 +15,17 @@
  * limitations under the License.
  */
 
-use crate::prelude::*;
+use lvgl::prelude::*;
 
 pub(crate) mod cglue {
     #![allow(dead_code)]
     #![allow(non_upper_case_globals)]
     #![allow(non_camel_case_types)]
     #![allow(non_snake_case)]
+    use lvgl::prelude::LvglImgDsc;
+    type lv_img_dsc_t= LvglImgDsc;
     include!("_capi-map.rs");
 }
 
-#[no_mangle]
-pub extern "C" fn lvgl_events_cb(event: *mut cglue::lv_event_t) {
-    unsafe {
-        let _widget = cglue::lv_event_get_target(event);
-        let ctx = cglue::lv_event_get_user_data(event);
-        let code = cglue::lv_event_get_code(event);
-        let widget = &mut *(ctx as *mut LvglWidget);
-
-        widget.callback(&LvglEvent::from(code));
-    }
-}
+// export static img asset
+include!("../assets/@img-assets.rs");

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+use crate::prelude::*;
 use lvgl::prelude::*;
 use std::any::Any;
 
@@ -69,8 +70,10 @@ impl DisplayHandle {
 
     pub fn draw_panel(&mut self) -> &mut Self {
         self.panel.push(
-            LvglLabel::new("Label-1", "Tux EvSe UI", 50, 400)
+            LvglLabel::new("Label-1", LvglMkFont::std_22(), 50, 400)
                 .set_info("Demo Label widget")
+                .set_value("This is a label widget")
+                .set_title("Label widget", 100, 75, LvglMkFont::std_10())
                 .set_size(300, 100)
                 .set_color(LvglColor::rvb(0, 0, 0))
                 .set_background(LvglColor::rvb(0xFF, 0xFF, 0xFF))
@@ -79,24 +82,31 @@ impl DisplayHandle {
         );
 
         self.panel.push(
-            LvglIcon::new("Icon-wifi", LvglPixmap::WIFI, 1000, 0)
+            LvglPixmap::new("Img-Charge", AssetPixmap::lightning_charge(), 500, 10)
+                .set_title("Pixmap", -15, 0, LvglMkFont::std_10())
+                .set_info("Demo Pixmap image")
+                .finalize(),
+        );
+
+        self.panel.push(
+            LvglPixmap::new("Icon-Charge", LvglIcon::WIFI, 1000, 0)
                 .set_info("Demo Wifi Icon")
                 .finalize(),
         );
 
         self.panel.push(
-            LvglIcon::new("Icon-Nfc", LvglPixmap::SD_CARD, 950, 0)
+            LvglPixmap::new("Icon-Nfc", LvglIcon::SD_CARD, 950, 0)
                 .set_color(LvglColor::rvb(255, 0, 0))
                 .finalize(),
         );
 
         self.panel
-            .push(LvglIcon::new("Icon-Battery", LvglPixmap::BATTERY_2, 900, 0).finalize());
+            .push(LvglPixmap::new("Icon-Battery", LvglIcon::BATTERY_2, 900, 0).finalize());
 
         self.panel.push(
             LvglLed::new("Led-Red", 850, 5)
                 .set_info("red led")
-                .set_color(LvglColor::palette(LvglPalette::RED))
+                .set_color(LvglColor::RED())
                 .set_size(10, 10)
                 .set_on(true)
                 .finalize(),
@@ -135,7 +145,7 @@ impl DisplayHandle {
         ];
         self.panel.push(
             LvglLine::new("Line", 400, 100)
-                .set_color(LvglColor::palette(LvglPalette::RED))
+                .set_color(LvglColor::RED())
                 .set_width(8)
                 .set_rounded(true)
                 .set_points(Box::new(points))
@@ -143,15 +153,17 @@ impl DisplayHandle {
         );
 
         self.panel.push(
-            LvglButton::new("Button-A", "Test-1", 100, 200)
-                .set_info("Demo Button 1")
+            LvglButton::new("Button-A", LvglMkFont::std_18(), 100, 200)
+                .set_value("My Button-A")
+                .set_info("Push Button 1")
                 .set_size(180, 100)
                 .finalize(),
         );
 
         self.panel.push(
-            LvglButton::new("Button-B", "Test-2", 300, 200)
-                .set_info("push button 1")
+            LvglButton::new("Button-B", LvglMkFont::std_14(), 300, 200)
+                .set_info("Push button B")
+                .set_value("My Button-B")
                 .finalize(),
         );
 
@@ -164,8 +176,8 @@ impl DisplayHandle {
         self.panel.push(
             LvglBar::new("Bar-1", 10, 90, 700, 300)
                 .set_info("variable bar")
-                .set_size(10,250)
-                .set_gradient(true, LvglColor::palette(LvglPalette::GREEN), LvglColor::palette(LvglPalette::YELLOW))
+                .set_size(10, 250)
+                .set_gradient(true, LvglColor::GREEN(), LvglColor::YELLOW())
                 .set_value(60)
                 .finalize(),
         );
@@ -173,44 +185,29 @@ impl DisplayHandle {
         self.panel.push(
             LvglBar::new("Bar-2", 10, 90, 400, 300)
                 .set_info("variable bar")
-                .set_size(250,10)
-                .set_gradient(false, LvglColor::palette(LvglPalette::GREEN), LvglColor::palette(LvglPalette::YELLOW))
+                .set_size(250, 10)
+                .set_gradient(false, LvglColor::GREEN(), LvglColor::YELLOW())
                 .set_value(40)
                 .finalize(),
         );
 
         self.panel.push(
-            LvglMeter::new(
-                "Meter",
-                4,
-                -10,
-                LvglColor::palette(LvglPalette::INDIGO),
-                800,
-                350,
-            )
-            .set_size(200, 200)
-            .set_tic(
-                3,
-                10,
-                41,
-                10,
-                8,
-                LvglColor::palette(LvglPalette::BLUE_GREY),
-                LvglColor::palette(LvglPalette::GREY),
-            )
-            .set_zone(0, 20, 4, LvglColor::palette(LvglPalette::RED))
-            .set_zone(80, 100, 4, LvglColor::palette(LvglPalette::GREEN))
-            .set_border(4, LvglColor::palette(LvglPalette::LIGHT_BLUE))
-            .set_background(LvglColor::palette(LvglPalette::PINK))
-            .set_value(50)
-            .finalize(),
+            LvglMeter::new("Meter", 4, -10, LvglColor::INDIGO(), 800, 350)
+                .set_size(200, 200)
+                .set_tic(3, 10, 41, 10, 8, LvglColor::BLUE_GREY(), LvglColor::GREY())
+                .set_zone(0, 20, 4, LvglColor::RED())
+                .set_zone(80, 100, 4, LvglColor::GREEN())
+                .set_border(4, LvglColor::LIGHT_BLUE())
+                .set_background(LvglColor::PINK())
+                .set_value(50)
+                .finalize(),
         );
 
         self.panel.push(
             LvglTextArea::new("Text-Area", 0, 550)
                 .set_info("Demo Text area Zone")
                 .set_width(600)
-                .set_text("display message zone")
+                .set_value("display message zone")
                 .finalize(),
         );
 
@@ -221,7 +218,10 @@ impl DisplayHandle {
         // sort widget by uid and add them to pannel pool
         self.panel.sort_by(|a, b| a.get_uid().cmp(&b.get_uid()));
         for widget in &self.panel {
-            widget.set_callback(self.ctrlbox);
+            match self.ctrlbox {
+                Some(callback) => widget.set_callback(callback),
+                None => {}
+            }
         }
         // start lvgl main loop thread
         self.handle.start_loop();

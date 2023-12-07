@@ -211,7 +211,7 @@ const uint8_t button_mid_map[] = {
 #endif
 };
 
-const lv_img_dsc_t lv_button_mid = {
+const lv_img_dsc_t asset_button_mid = {
   .header.always_zero = 0,
   .header.w = 5,
   .header.h = 49,

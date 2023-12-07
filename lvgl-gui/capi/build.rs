@@ -12,6 +12,9 @@ use std::env;
 fn main() {
     // invalidate the built crate whenever the wrapper changes
     println!("cargo:rerun-if-changed=capi/capi-map.c");
+    println!("cargo:rustc-link-search=/usr/local/lib64");
+    println!("cargo:rustc-link-arg=-llvgl");
+    println!("cargo:rustc-link-arg=-llv_drivers");
 
     let header = "
     // -----------------------------------------------------------------------
@@ -22,7 +25,9 @@ fn main() {
     //     - build.rs for C/Rust glue options
     //     - src/capi/capi-map.c for C prototype inputs
     // -----------------------------------------------------------------------
-    ";
+    ".to_string();
+    let prj_dir= format!("\npub const PRJ_DIR:&str=\"{}\";", env::var("CARGO_MANIFEST_DIR").unwrap());
+    let header= header + prj_dir.as_str();
 
     let gtk_selected= match env::var("USE_GTK") {
         Ok(_value) => {
@@ -33,28 +38,15 @@ fn main() {
         Err(_) => 0
     };
 
-    let (use_gtk, use_fbdev, use_evdev)= if gtk_selected == 1{
-        ("-DUSE_GTK=1","-DUSE_FBDEV=0","-DUSE_EVDEV=0")
-    }else {
-        ("-DUSE_GTK=0","-DUSE_FBDEV=1","-DUSE_EVDEV=1")
-    };
-
     let _capi_map = bindgen::Builder::default()
         .header("capi/capi-map.c")
         .clang_arg("-I/usr/local/include/lvgl")
-        .clang_arg(use_gtk)
-        .clang_arg(use_fbdev)
-        .clang_arg(use_evdev)
         .raw_line(header)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .derive_debug(false)
         .layout_tests(false)
-        .allowlist_item("gtkdrv_.*")
-        .allowlist_item("evdev_.*")
-        .allowlist_item("fbdev_.*")
-        .allowlist_var("LV_.*")
-        .allowlist_item("lv_.*")
-        .allowlist_item("line_.*")
+        .allowlist_item("img_.*")
+        .blocklist_type("lv_img_dsc_t") // defined in lvgl-rclib
         .generate()
         .expect("Unable to generate _capi-map.rs");
 
@@ -68,5 +60,5 @@ fn main() {
         .define("USE_GTK", defined.as_str())
         .include("/usr/local/include/lvgl")
         .include("/usr/local/include")
-        .compile("lvgl-glue");
+        .compile("lvgl-asset");
 }

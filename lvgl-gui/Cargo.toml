@@ -4,11 +4,12 @@ version = "0.0.1"
 edition = "2021"
 authors = ["Fulup Le Foll <fulup@iot.bzh>"]
 publish = false
+build = "capi/build.rs"
 
 [dependencies]
 afbv4 = {git= "https://github.com/redpesk-common/afb-librust", branch="master", optional = true}
-lvgl = {path ="../lvgl-lib"}
-
+#lvgl = {git= "https://github.com/tux-evse/lvgl-rclib-rs", branch="main", optional = false}
+lvgl = {path= "../../lvgl-rclib-rs"}
 
 [build-dependencies]
 bindgen    = ">=0.6"

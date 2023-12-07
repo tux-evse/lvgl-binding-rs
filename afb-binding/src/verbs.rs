@@ -44,7 +44,7 @@ impl LvglHandler for WidgetEvtCtx {
         match widget {
             LvglWidget::Label(this) => {
                 println!("button:{} get event:{:?}", uid, event);
-                this.set_text("was pressed");
+                this.set_value("was pressed");
             }
             _ => {}
         }
@@ -83,7 +83,7 @@ struct TextCtx {
 AfbVerbRegister!(InfoVerb, info_verb_cb, TextCtx);
 fn info_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut TextCtx) -> Result<(), AfbError> {
     let text = args.get::<String>(0)?;
-    ctx.widget.set_text(text.as_str());
+    ctx.widget.set_value(text.as_str());
     rqt.reply(AFB_NO_DATA, 0);
     Ok(())
 }

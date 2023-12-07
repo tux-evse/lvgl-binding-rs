@@ -215,7 +215,7 @@ const uint8_t button_left_map[] = {
 #endif
 };
 
-const lv_img_dsc_t lv_button_left = {
+const lv_img_dsc_t asset_button_left = {
   .header.always_zero = 0,
   .header.w = 8,
   .header.h = 50,

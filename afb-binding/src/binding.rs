@@ -101,8 +101,7 @@ pub fn binding_init(rootv4: AfbApiV4, jconf: JsoncObj) -> Result<&'static AfbApi
         }
     };
 
-    if let Ok(mut value) = jconf.get::<String>("logo") {
-        value.insert_str(0, "L:");
+    if let Ok(value) = jconf.get::<String>("logo") {
         LvglImage::new("tux-evse", value.as_str(), 0, 0);
     }
 
@@ -113,10 +112,10 @@ pub fn binding_init(rootv4: AfbApiV4, jconf: JsoncObj) -> Result<&'static AfbApi
         let secondary = json_to_color(jvalue.get::<JsoncObj>("secondary")?)?;
         display.set_theme(primary, secondary, dark, LvglMkFont::std_14());
     } else {
-        let primary = LvglColor::palette(LvglPalette::LIGHT_BLUE);
-        let secondary = LvglColor::palette(LvglPalette::BLUE_GREY);
+        let primary = LvglColor::LIGHT_BLUE();
+        let secondary = LvglColor::BLUE_GREY();
         // Fulup TBD apply a correct theme
-        display.set_theme(primary, secondary, true, LvglMkFont::std_14());
+        display.set_theme(primary, secondary, false, LvglMkFont::std_14());
     }
 
     // create backend API

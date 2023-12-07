@@ -15,34 +15,11 @@
  * limitations under the License.
  */
 
-#define LV_CONF_INCLUDE_SIMPLE 1
-
+// include your LVGL compiled asset
 #include "lvgl/lvgl.h"
+#include "../assets/@img-assets.c"
 
-#ifdef USE_FBDEV
-#include "lv_drivers/display/fbdev.h"
-#include "lv_drivers/indev/evdev.h"
-#endif
-
-#if USE_GTK
-#include "lv_drivers/gtkdrv/gtkdrv.h"
-#endif
-
-#include "../assets/button_left.c"
-#include "../assets/button_mid.c"
-#include "../assets/button_right.c"
-#include "../assets/mouse_cursor.c"
-
-const lv_point_t line_points[] = { {5, 5}, {70, 70}, {120, 10}, {180, 60}, {240, 10} };
+// include here after any C function to import
+// dont forget to update build.rs allowed_item list
 
 
-// import some usefull inline macro
-lv_color_t lv_color_mk(uint8_t r, uint8_t g, uint8_t b)
-{
-    return _LV_COLOR_MAKE_TYPE_HELPER LV_COLOR_MAKE(r, g, b);
-}
-
-lv_obj_t * lv_scr_action(void)
-{
-    return lv_disp_get_scr_act(lv_disp_get_default());
-}

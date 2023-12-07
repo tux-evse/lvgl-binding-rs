@@ -13,7 +13,7 @@
             "path": "${CARGO_TARGET_DIR}debug/libafb_lvgl.so",
             "info": "lvgl embedded display binding",
             "permission": "acl:display:client",
-         	"logo": "${HOME}/Workspace/Tux-Evse/lvgl-binding-rs/afb-binding/etc/tux-evsex150.png",
+         	"logo": "./afb-binding/etc/tux-evsex150.png",
             "test": 1,
             "display": {
                 "x_res": 1024,

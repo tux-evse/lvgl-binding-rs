@@ -94,7 +94,7 @@ const uint8_t mouse_cursor_map[] = {
 #endif
 };
 
-lv_img_dsc_t lv_mouse_cursor = {
+lv_img_dsc_t img_mouse_cursor = {
     .header.always_zero = 0,
     .header.w = 14,
     .header.h = 20,

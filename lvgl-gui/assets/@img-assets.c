@@ -1,0 +1,18 @@
+//@BEGIN_IMG_imgS@
+#include "wifi_on.c"
+#include "nfc_off.c"
+#include "ethernet_on.c"
+#include "wifi_off.c"
+#include "calendar3.c"
+#include "ethernet_off.c"
+#include "info_circle_fill.c"
+#include "nfc_on.c"
+#include "lightning_charge.c"
+#include "tux_evsex40.c"
+#include "stopwatch.c"
+#include "reception_on.c"
+#include "clock.c"
+#include "tux_evsex150.c"
+#include "reception_off.c"
+#include "translate.c"
+//@END_IMG_imgS@
