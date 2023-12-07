@@ -1,30 +1,45 @@
 # lvgl-binding-rs
-Embedded graphic lvgl Rust afb-v4 binding
 
-## reference:
-https://docs.lvgl.io/8/widgets/index.html
+Binding template/demo interfacing lvgl-rclib-rs with libafb-rs micro service architecture.
 
-## testing without root privilege
+## Building dependencies:
 
-1) In order to test without admin privileges, you need access to
+* libafb-rs: git@git.ovh.iot:redpesk/redpesk-common/afb-librust.git
+* liblvgl-rs: git@github.com:tux-evse/lvgl-rclib-rs.git
 
-* /dev/fb0 generally with 'video' group
-* /dev/input0 usually with 'input' group
+### Compiling for frame-buffer
 
-2) find which virtual console hold /dev/fb0 framebuffer
+Default driver is frame-buffer, it is typically what is used for embedded devices.
 
-* switch virtual console with (Alt+Ctrl+F1) (Alt+Ctrl+F2) ...
-* after login check with cat /dev/urandom >/dev/fb0
+```
+nm /usr/local/lib64/liblv_drivers.so | grep fbdev_init
+cargo build
+```
 
-If your screen is repainted, then you are on /dev/fb0 other wise switch to next virtual console.
+### Compiling with GTK emulator
 
-3) start display-binding
+For development and especially for business logic debug with vscode/llgb-gdb, it is far simpler to use GTK than FBDEV.
+
+* Check GTK driver is enabled
+* Select GTK by setting ```USE_GTK=1``` environnement variable
+
+```
+nm /usr/local/lib64/liblv_drivers.so | grep gtk_init
+USE_GTK=1 cargo build
+```
+
+## start display-binding
 
 ```
 display-binding/afb-binding/etc/binding-test.sh
+firefox --new-window http://localhost:1234
 ```
 
 ## Demo screen on framebuffer
+
+In order to use GTK frame-buffer emulation, you should
+* check that kvgl-rclib-rs is installed with GTK enabled
+* USE_GTK=1 cargo build
 
 ![LVGL demo screen](Docs/lvgl-demo-screen.png)
 
@@ -33,7 +48,7 @@ display-binding/afb-binding/etc/binding-test.sh
 ![LVGL demo api](Docs/lvgl-demo-api.png)
 
 
-4) Rust LVGL api sample
+## Rust LVGL api sample
 
 Check Display::draw_panel within display-lvgl.rs for more samples
 
@@ -56,7 +71,7 @@ LvglButton::new("Button-A", "Test-1", 100, 200)
     .finalize();
 ```
 
-5) Faire un screencast du framebuffer
+## Faire un screencast du framebuffer
 
 Copy framebuffer and transform it yo PNG. If needed crop image to content with gimp.
 ```
@@ -64,3 +79,17 @@ cp /dev/fb0 > /tmp/screen.data
 RESOLUTION="1920x1080"
 ffmpeg -vcodec rawvideo -f rawvideo -pix_fmt rgb32 -s $RESOLUTION -i /tmp/screen.data -f image2 -vcodec png screenshot.png
 ```
+
+## testing without root privilege
+
+1) In order to test without admin privileges, you need access to
+
+* /dev/fb0 generally with 'video' group
+* /dev/input0 usually with 'input' group
+
+2) find which virtual console hold /dev/fb0 framebuffer
+
+* switch virtual console with (Alt+Ctrl+F1) (Alt+Ctrl+F2) ...
+* after login check with cat /dev/urandom >/dev/fb0
+
+If your screen is repainted, then you are on /dev/fb0 other wise switch to next virtual console.
