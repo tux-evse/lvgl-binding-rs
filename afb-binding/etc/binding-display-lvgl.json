@@ -9,14 +9,26 @@
         {
             "uid": "display-lvgl",
             "api": "display",
-            "path": "${CARGO_TARGET_DIR}debug/libafb_lvgl.so",
+            "path": "${HOME}/.cargo/build/debug/libafb_lvgl.so",
             "info": "lvgl embedded display binding",
             "permission": "acl:display:client",
-         	"logo": "${HOME}/Workspace/Tux-Evse/lvgl-binding-rs/afb-binding/etc/tux-evsex150.png",
             "display": {
                 "x_res": 1024,
                 "y_res": 600,
                 "ratio": 1
+            },
+            "theme": {
+                "dark": false,
+                "primary": {
+                    "red": 10,
+                    "blue": 20,
+                    "green": 30 
+                } ,
+                "secondary":{
+                    "red": 40,
+                    "blue": 50,
+                    "green": 50 
+                }
             }
         }
     ]

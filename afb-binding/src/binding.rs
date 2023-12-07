@@ -56,7 +56,7 @@ pub fn binding_init(rootv4: AfbApiV4, jconf: JsoncObj) -> Result<&'static AfbApi
     let uid = if let Ok(value) = jconf.get::<String>("uid") {
         to_static_str(value)
     } else {
-        "lvgl"
+        "display-lvgl"
     };
 
     let api = if let Ok(value) = jconf.get::<String>("api") {
@@ -99,10 +99,7 @@ pub fn binding_init(rootv4: AfbApiV4, jconf: JsoncObj) -> Result<&'static AfbApi
         ));
     };
 
-    if let Ok(mut value) = jconf.get::<String>("logo") {
-        value.insert_str(0,"L:");
-        LvglImage::new("tux-evse", value.as_str(),0,0);
-    }
+
 
     // check theme and provide default if needed
     if let Ok(jvalue) = jconf.get::<JsoncObj>("theme") {

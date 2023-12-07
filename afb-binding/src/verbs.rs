@@ -175,15 +175,25 @@ pub(crate) fn register_verbs(
         .finalize()?;
 
     // create and register widget verbs (Warning type mismatch is only detected at runtime)
-    verb_by_uid!(api, display, "Text-Area", LvglTextArea, TextCtx);
-    verb_by_uid!(api, display, "Meter", LvglMeter, MeterCtx);
-    verb_by_uid!(api, display, "Led-Green", LvglLed, LedCtx);
-    verb_by_uid!(api, display, "Led-Red", LvglLed, LedCtx);
-    verb_by_uid!(api, display, "Switch-1", LvglSwitch, SwitchCtx);
-    verb_by_uid!(api, display, "Switch-2", LvglSwitch, SwitchCtx);
-    verb_by_uid!(api, display, "Bar-1", LvglBar, BarCtx);
-    verb_by_uid!(api, display, "Bar-2", LvglBar, BarCtx);
-    verb_by_uid!(api, display, "Arc", LvglArc, ArcCtx);
+    //verb_by_uid!(api, display, "Text-Area", LvglTextArea, TextCtx);
+    //verb_by_uid!(api, display, "Meter", LvglMeter, MeterCtx);
+    //verb_by_uid!(api, display, "Led-Green", LvglLed, LedCtx);
+    //verb_by_uid!(api, display, "Led-Red", LvglLed, LedCtx);
+    verb_by_uid!(api, display, "Switch-iso", LvglSwitch, SwitchCtx);
+    verb_by_uid!(api, display, "Switch-pnc", LvglSwitch, SwitchCtx);
+    verb_by_uid!(api, display, "Switch-v2g", LvglSwitch, SwitchCtx);
+    //verb_by_uid!(api, display, "Bar-1", LvglBar, BarCtx);
+    //verb_by_uid!(api, display, "Bar-2", LvglBar, BarCtx);
+    //verb_by_uid!(api, display, "Arc", LvglArc, ArcCtx);
+
+    //TODO:
+    //verb_by_uid!(api, display, "BatConso", LvglLabel, LabelCtx);
+    //verb_by_uid!(api, display, "ChargeTotal", LvglLabel, LabelCtx);
+    //verb_by_uid!(api, display, "ChargeDuration", LvglLabel, LabelCtx);
+    //verb_by_uid!(api, display, "ZoneMessage", LvglTextArea, LabelCtx);
+    //verb_by_uid!(api, display, "date", LvglLabel, LabelCtx);
+    //verb_by_uid!(api, display, "time", LvglLabel, LabelCtx);
+
 
     // register verb+event
     api.add_event(event);

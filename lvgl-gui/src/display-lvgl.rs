@@ -68,16 +68,19 @@ impl DisplayHandle {
     }
 
     pub fn draw_panel(&mut self) -> &mut Self {
+        /* 
         self.panel.push(
-            LvglLabel::new("Label-1", "Tux EvSe UI", 50, 400)
-                .set_info("Demo Label widget")
-                .set_size(300, 100)
-                .set_color(LvglColor::rvb(0, 0, 0))
-                .set_background(LvglColor::rvb(0xFF, 0xFF, 0xFF))
-                .set_border(3, LvglColor::rvb(0, 0xff, 0))
+            LvglIcon::new("Icon-logo", lv_tux_evse, 500, 500)
+                .set_info("Demo logo Icon")
                 .finalize(),
         );
+*/
+    self.panel.push(
+        LvglImgButton::new( "test imgBut", "label", 500, 500, LvglColor::palette(LvglPalette::INDIGO),1000, 2000 )
+            .finalize(),
+    );
 
+/*
         self.panel.push(
             LvglIcon::new("Icon-wifi", LvglPixmap::WIFI, 1000, 0)
                 .set_info("Demo Wifi Icon")
@@ -111,50 +114,219 @@ impl DisplayHandle {
                 .set_on(true)
                 .finalize(),
         );
+*/
+        let line_x_ofs = 10 ;
+        let line_top_y_ofs = 150 ;
+        let line_mid_y_ofs = 250 ;
+        let line_bot_y_ofs = 400 ;
+        let line_x_end = 1024-2*line_x_ofs;
+        let line_width = 5;
+        let line_color = LvglPalette::LIGHT_BLUE;
+
+        let points_line_top = [
+            LvglPoint { x: line_x_ofs,       y: line_top_y_ofs },
+            LvglPoint { x: line_x_end,       y: line_top_y_ofs },
+        ];
+
+        let points_line_mid = [
+            LvglPoint { x: line_x_ofs,       y: line_mid_y_ofs },
+            LvglPoint { x: line_x_end,       y: line_mid_y_ofs },
+        ];
+
+        let points_line_bot = [
+            LvglPoint { x: line_x_ofs,       y: line_bot_y_ofs },
+            LvglPoint { x: line_x_end,       y: line_bot_y_ofs },
+        ];
 
         self.panel.push(
-            LvglSwitch::new("Switch-1", 670, 5)
-                .set_check(false)
-                .set_height(20)
-                .finalize(),
+            LvglLine::new("line_top", 0, 0)
+            .set_color(LvglColor::palette(line_color))
+            .set_width(line_width)
+            .set_rounded(true)
+            .set_points(Box::new(points_line_top))
+            .finalize(),
         );
 
         self.panel.push(
-            LvglSwitch::new("Switch-2", 600, 5)
+            LvglLine::new("line_mid", 0, 0)
+            .set_color(LvglColor::palette(line_color))
+            .set_width(line_width)
+            .set_rounded(true)
+            .set_points(Box::new(points_line_mid))
+            .finalize(),
+        );
+
+        self.panel.push(
+            LvglLine::new("line_bot", 0, 0)
+            .set_color(LvglColor::palette(line_color))
+            .set_width(line_width)
+            .set_rounded(true)
+            .set_points(Box::new(points_line_bot))
+            .finalize(),
+        );
+
+        let label_date_x_ofs = 600;
+        let label_time_x_ofs = 700;
+        let label_date_y_ofs = line_top_y_ofs - 100 ;
+        let label_date_height = 20;
+        let label_time_height = label_date_height;
+        
+        self.panel.push(
+            LvglLabel::new("date", "05/12/2023", label_date_x_ofs, label_date_y_ofs)
+        .set_height(label_date_height)
+        .finalize(),
+        );
+
+        self.panel.push(
+            LvglLabel::new("time", "17:20:25", label_time_x_ofs, label_date_y_ofs)
+        .set_height(label_time_height)
+        .finalize(),
+        );
+
+
+
+        let switch_height = 20;
+        let switch_title_height = 20;
+        let switch_label_height = 15;
+        let switch_x_ofs = 860;
+        let switch_label_x_ofs = switch_x_ofs-70;
+        let switch_sep = 5;
+        let switch_iso_y_ofs = line_mid_y_ofs + 50;
+        let switch_pnc_y_ofs = switch_iso_y_ofs+(switch_height+switch_sep)*1;
+        let switch_v2g_y_ofs = switch_iso_y_ofs+(switch_height+switch_sep)*2;
+        let switch_line_width = 6;
+        let switch_line_color = LvglColor::palette(LvglPalette::CYAN);
+
+        self.panel.push(
+            LvglLabel::new("Label Switch", "Smart Charging", switch_x_ofs-50, switch_iso_y_ofs-switch_title_height-switch_sep)
+        .set_height(switch_title_height)
+        .finalize(),
+        );
+
+        self.panel.push(
+            LvglLabel::new("Label Switch  iso", "ISO 15118", switch_label_x_ofs, switch_iso_y_ofs)
+        .set_height(switch_title_height)
+        .finalize(),
+        );
+
+        self.panel.push(
+            LvglLabel::new("Label Switch pnc", "PnG", switch_label_x_ofs, switch_pnc_y_ofs)
+        .set_height(switch_title_height)
+        .finalize(),
+        );
+
+        self.panel.push(
+            LvglLabel::new("Label Switch v2g", "V2G", switch_label_x_ofs, switch_v2g_y_ofs)
+        .set_height(switch_title_height)
+        .finalize(),
+        );
+
+        self.panel.push(
+            LvglSwitch::new("Switch-iso", switch_x_ofs, switch_iso_y_ofs)
                 .set_check(true)
-                .set_height(20)
+                .set_height(switch_height)
                 .finalize(),
         );
 
-        let points = [
-            LvglPoint { x: 5, y: 5 },
-            LvglPoint { x: 70, y: 70 },
-            LvglPoint { x: 120, y: 10 },
-            LvglPoint { x: 180, y: 60 },
-            LvglPoint { x: 240, y: 10 },
+        self.panel.push(
+            LvglSwitch::new("Switch-pnc", switch_x_ofs, switch_pnc_y_ofs)
+                .set_check(true)
+                .set_height(switch_height)
+                .finalize(),
+        );
+
+        self.panel.push(
+            LvglSwitch::new("Switch-v2g", switch_x_ofs, switch_v2g_y_ofs)
+                .set_check(true)
+                .set_height(switch_height)
+                .finalize(),
+        );
+
+        let points_label = [
+            LvglPoint { x: switch_label_x_ofs - (switch_height + 10),       y: switch_iso_y_ofs - (switch_title_height + switch_sep + 10) },
+            LvglPoint { x: switch_label_x_ofs - (switch_height + 10),       y: switch_v2g_y_ofs + (switch_title_height + switch_sep + 10) },
+            LvglPoint { x: switch_x_ofs       + (switch_height + 10 + 50), y: switch_v2g_y_ofs + (switch_title_height + switch_sep + 10)},
+            LvglPoint { x: switch_x_ofs       + (switch_height + 10 + 50), y: switch_iso_y_ofs - (switch_title_height + switch_sep + 10) },
+            LvglPoint { x: switch_label_x_ofs - (switch_height + 10),       y: switch_iso_y_ofs - (switch_title_height + switch_sep + 10)},
         ];
         self.panel.push(
-            LvglLine::new("Line", 400, 100)
-                .set_color(LvglColor::palette(LvglPalette::RED))
-                .set_width(8)
+            LvglLine::new("Line switch", 0, 0)
+                .set_color(switch_line_color)
+                .set_width(switch_line_width)
                 .set_rounded(true)
-                .set_points(Box::new(points))
+                .set_points(Box::new(points_label))
                 .finalize(),
         );
 
+        let label_charge_info_x_ofs = 450;
+        let label_charge_info_height = 30;
+        let label_charge_info_y_ofs    = switch_iso_y_ofs - switch_title_height - switch_sep ;
+        let label_charge_total_y_ofs    = label_charge_info_y_ofs + label_charge_info_height;
+        let label_charge_duration_y_ofs = label_charge_info_y_ofs + 2*label_charge_info_height;
+
+        self.panel.push(
+            LvglLabel::new("Charge info", "Charge Information", label_charge_info_x_ofs, label_charge_info_y_ofs)
+        .set_height(label_charge_info_height)
+        .finalize(),
+        );
+
+        self.panel.push(
+            LvglLabel::new("ChargeTotal", "Energy: 13477.1 Kwh Total", label_charge_info_x_ofs, label_charge_total_y_ofs)
+        .set_height(label_charge_info_height)
+        .finalize(),
+        );
+
+        self.panel.push(
+            LvglLabel::new("ChargeDuration", "Duration: 01:02:46", label_charge_info_x_ofs, label_charge_duration_y_ofs)
+        .set_height(label_charge_info_height)
+        .finalize(),
+        );
+
+        let label_status_bat_x_ofs = 50;
+        let label_status_bat_y_ofs = switch_iso_y_ofs - switch_title_height - switch_sep ;
+        let label_status_bat_height = 20;
+
+        self.panel.push(
+            LvglLabel::new("Status Bat", "Status battery", label_status_bat_x_ofs, label_status_bat_y_ofs)
+        .set_height(label_status_bat_height)
+        .finalize(),
+        );
+
+        self.panel.push(
+            LvglLabel::new("BatConso", "2760.4kw", label_status_bat_x_ofs, label_status_bat_y_ofs+100)
+        .set_height(label_status_bat_height)
+        .finalize(),
+        );
+
+        let label_zone_mess_x_ofs = 200;
+        let label_zone_mess_y_ofs = line_bot_y_ofs + 10 ;
+        let label_zone_mess_height = 800;
+
+        self.panel.push(
+            LvglTextArea::new("ZoneMessage", label_zone_mess_x_ofs, label_zone_mess_y_ofs)
+                .set_info("Zone Message")
+                .set_width(label_zone_mess_height)
+                .set_text("No matter where you go there you are")
+                .finalize(),
+        );
+
+        /*
         self.panel.push(
             LvglButton::new("Button-A", "Test-1", 100, 200)
                 .set_info("Demo Button 1")
                 .set_size(180, 100)
                 .finalize(),
         );
-
+*/
+/* 
         self.panel.push(
             LvglButton::new("Button-B", "Test-2", 300, 200)
                 .set_info("push button 1")
                 .finalize(),
         );
+*/
 
+/*
         self.panel.push(
             LvglArc::new("Arc", 10, 270, 800, 150)
                 .set_info("Arc widget")
@@ -178,7 +350,9 @@ impl DisplayHandle {
                 .set_value(40)
                 .finalize(),
         );
+*/
 
+/*
         self.panel.push(
             LvglMeter::new(
                 "Meter",
@@ -205,7 +379,9 @@ impl DisplayHandle {
             .set_value(50)
             .finalize(),
         );
+*/
 
+/*
         self.panel.push(
             LvglTextArea::new("Text-Area", 0, 550)
                 .set_info("Demo Text area Zone")
@@ -213,7 +389,7 @@ impl DisplayHandle {
                 .set_text("display message zone")
                 .finalize(),
         );
-
+*/
         self
     }
 

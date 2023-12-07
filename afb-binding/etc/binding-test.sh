@@ -6,7 +6,7 @@ export PATH="/usr/local/lib64:$PATH"
 clear
 ulimit -c 0 # no core dump
 
-if ! test -f $CARGO_TARGET_DIR/debug/libafb_display.so; then
+if ! test -f $CARGO_TARGET_DIR/debug/libafb_lvgl.so; then
     echo "FATAL: missing libafb_lvgl.so use: cargo build"
     exit 1
 fi
@@ -17,9 +17,9 @@ if ! test -w /dev/fb0; then
     exit 1
 fi
 
-if ! test -r /dev/input/mouse0; then
+if ! test -r /dev/input/lvgl; then
     echo "FATAL: missing permision to read /dev/input/mouse0 (missing group input ???)"
-    ls -l //dev/input/mouse0
+    ls -l /dev/input/lvgl
     exit 1
 fi
 

@@ -28,6 +28,25 @@
 #include "../assets/button_right.c"
 #include "../assets/mouse_cursor.c"
 
+//@BEGIN_IMG_ASSETS@
+#include "../assets/wifi_on.c"
+#include "../assets/nfc_off.c"
+#include "../assets/ethernet_on.c"
+#include "../assets/wifi_off.c"
+#include "../assets/calendar3.c"
+#include "../assets/ethernet_off.c"
+#include "../assets/info_circle_fill.c"
+#include "../assets/nfc_on.c"
+#include "../assets/lightning_charge.c"
+#include "../assets/tux_evsex40.c"
+#include "../assets/stopwatch.c"
+#include "../assets/reception_on.c"
+#include "../assets/clock.c"
+#include "../assets/tux_evsex150.c"
+#include "../assets/reception_off.c"
+#include "../assets/translate.c"
+//@END_IMG_ASSETS@
+
 const lv_point_t line_points[] = { {5, 5}, {70, 70}, {120, 10}, {180, 60}, {240, 10} };
 
 

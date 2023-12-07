@@ -132,3 +132,35 @@ impl LvglMkFont {
     impl_static_font! (std_40, lv_font_montserrat_40);
     impl_static_font! (std_48, lv_font_montserrat_48);
 }
+
+pub type LvglImageBin= cglue::lv_img_dsc_t;
+
+macro_rules! impl_static_imgbin {
+    ($label:ident, $imgbin:ident) => {
+        pub fn $label() -> &'static LvglImageBin {
+            unsafe { &cglue::$imgbin }
+        }
+    }
+}
+
+pub struct LvglMkImgBin;
+impl LvglMkImgBin {
+//@BEGIN_IMG_ASSETS@
+    impl_static_imgbin! (wifi_on, lv_wifi_on);
+    impl_static_imgbin! (nfc_off, lv_nfc_off);
+    impl_static_imgbin! (ethernet_on, lv_ethernet_on);
+    impl_static_imgbin! (wifi_off, lv_wifi_off);
+    impl_static_imgbin! (calendar3, lv_calendar3);
+    impl_static_imgbin! (ethernet_off, lv_ethernet_off);
+    impl_static_imgbin! (info_circle_fill, lv_info_circle_fill);
+    impl_static_imgbin! (nfc_on, lv_nfc_on);
+    impl_static_imgbin! (lightning_charge, lv_lightning_charge);
+    impl_static_imgbin! (tux_evsex40, lv_tux_evsex40);
+    impl_static_imgbin! (stopwatch, lv_stopwatch);
+    impl_static_imgbin! (reception_on, lv_reception_on);
+    impl_static_imgbin! (clock, lv_clock);
+    impl_static_imgbin! (tux_evsex150, lv_tux_evsex150);
+    impl_static_imgbin! (reception_off, lv_reception_off);
+    impl_static_imgbin! (translate, lv_translate);
+//@END_IMG_ASSETS@
+}
