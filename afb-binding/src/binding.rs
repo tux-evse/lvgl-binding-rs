@@ -28,10 +28,10 @@ pub(crate) enum QuerySubscribe {
     UNSUBSCRIBE,
 }
 
-AfbDataConverter!(api_arg_switch, QuerySwitch);
+AfbDataConverter!(api_arg_switch, QueryOnOff);
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(tag = "action")]
-pub(crate) enum QuerySwitch {
+pub(crate) enum QueryOnOff {
     #[default]
     ON,
     OFF,

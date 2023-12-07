@@ -27,5 +27,13 @@ pub(crate) mod cglue {
     include!("_capi-map.rs");
 }
 
+macro_rules! impl_static_imgbin {
+    ($label:ident, $imgbin:ident) => {
+        pub fn $label() -> &'static LvglImgDsc {
+            unsafe { &cglue::$imgbin }
+        }
+    }
+}
+
 // export static img asset
 include!("../assets/@img-assets.rs");

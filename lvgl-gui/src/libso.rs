@@ -22,7 +22,8 @@ mod capi;
 mod display;
 
 pub mod prelude {
-    pub(crate) use crate::capi::*;
+    //pub(crate) use crate::capi::*;
+    pub use crate::capi::AssetPixmap;
     pub use crate::display::*;
     pub use lvgl::prelude::*;
 }

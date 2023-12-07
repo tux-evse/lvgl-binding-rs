@@ -121,16 +121,33 @@ fn bar_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut BarCtx) -> Result<(),
     Ok(())
 }
 
+struct NfcCtx {
+    widget: &'static LvglPixButton,
+}
+AfbVerbRegister!(NfcVerb, ncf_verb_cb, NfcCtx);
+fn ncf_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut NfcCtx) -> Result<(), AfbError> {
+    match args.get::<&QueryOnOff>(0)? {
+        QueryOnOff::ON => {
+            ctx.widget.set_value(AssetPixmap::nfc_on());
+        }
+        QueryOnOff::OFF => {
+            ctx.widget.set_value(AssetPixmap::ethernet_on());
+        }
+    }
+    rqt.reply(AFB_NO_DATA, 0);
+    Ok(())
+}
+
 struct SwitchCtx {
     widget: &'static LvglSwitch,
 }
 AfbVerbRegister!(SwitchVerb, switch_verb_cb, SwitchCtx);
 fn switch_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut SwitchCtx) -> Result<(), AfbError> {
-    match args.get::<&QuerySwitch>(0)? {
-        QuerySwitch::ON => {
+    match args.get::<&QueryOnOff>(0)? {
+        QueryOnOff::ON => {
             ctx.widget.set_check(true);
         }
-        QuerySwitch::OFF => {
+        QueryOnOff::OFF => {
             ctx.widget.set_check(false);
         }
     }
@@ -143,11 +160,11 @@ struct LedCtx {
 }
 AfbVerbRegister!(LedVerb, led_verb_cb, LedCtx);
 fn led_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut LedCtx) -> Result<(), AfbError> {
-    match args.get::<&QuerySwitch>(0)? {
-        QuerySwitch::ON => {
+    match args.get::<&QueryOnOff>(0)? {
+        QueryOnOff::ON => {
             ctx.widget.set_on(true);
         }
-        QuerySwitch::OFF => {
+        QueryOnOff::OFF => {
             ctx.widget.set_on(false);
         }
     }
@@ -185,6 +202,7 @@ pub(crate) fn register_verbs(
     verb_by_uid!(api, display, "Bar-1", LvglBar, BarCtx);
     verb_by_uid!(api, display, "Bar-2", LvglBar, BarCtx);
     verb_by_uid!(api, display, "Arc", LvglArc, ArcCtx);
+    verb_by_uid!(api, display, "Pixmap-Button", LvglPixButton, NfcCtx);
 
     // register verb+event
     api.add_event(event);

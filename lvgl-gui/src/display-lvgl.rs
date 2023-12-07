@@ -82,21 +82,18 @@ impl DisplayHandle {
         );
 
         self.panel.push(
-            LvglPixmap::new("Img-Charge", AssetPixmap::lightning_charge(), 500, 10)
-                .set_title("Pixmap", -15, 0, LvglMkFont::std_10())
-                .set_info("Demo Pixmap image")
+            LvglPixButton::new("Pixmap-Button", 450, 7)
+                .set_info("Demo Pixmap Button")
+                .set_value(AssetPixmap::nfc_off())
+                .set_background(LvglColor::BLUE_GREY())
+                .set_title("Clickable", 12, 6, LvglMkFont::std_10())
+                .set_border(3, LvglColor::PURPLE())
                 .finalize(),
         );
 
         self.panel.push(
             LvglPixmap::new("Icon-Charge", LvglIcon::WIFI, 1000, 0)
                 .set_info("Demo Wifi Icon")
-                .finalize(),
-        );
-
-        self.panel.push(
-            LvglPixmap::new("Icon-Nfc", LvglIcon::SD_CARD, 950, 0)
-                .set_color(LvglColor::rvb(255, 0, 0))
                 .finalize(),
         );
 
@@ -134,6 +131,20 @@ impl DisplayHandle {
                 .set_check(true)
                 .set_height(20)
                 .finalize(),
+        );
+
+        self.panel.push(
+            LvglQrcode::new(
+                "qr-code",
+                LvglColor::LIGHT_BLUE(),
+                LvglColor::DEEP_PURPLE(),
+                150,
+                450,
+                370,
+            )
+            .set_value("https://github.com/tux-evse")
+            .set_title("tux-evse@github", 10, 0, LvglMkFont::std_14())
+            .finalize(),
         );
 
         let points = [
