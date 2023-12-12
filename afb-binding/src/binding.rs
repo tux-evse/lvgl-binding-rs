@@ -94,10 +94,10 @@ pub fn binding_init(rootv4: AfbApiV4, jconf: JsoncObj) -> Result<&'static AfbApi
             DisplayHandle::create(x_res as i16, y_res as i16, ratio)
         }
         Err(_error) => {
-            return Err(AfbError::new(
+            return afb_error!(
                 "display-config-fail",
-                "mandatory 'display' config missing",
-            ));
+                "mandatory 'display' config missing"
+            );
         }
     };
 

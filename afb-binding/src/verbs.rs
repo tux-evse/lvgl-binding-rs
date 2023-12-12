@@ -19,19 +19,21 @@ macro_rules! verb_by_uid {
         let widget = match $display.get_by_uid($uid).downcast_ref::<$widget>() {
             Some(widget) => widget,
             None => {
-                return Err(AfbError::new(
+                return afb_error!(
                     "verb-info-widget",
-                    format!("no widget uid:{} type:{} found in panel", $uid, stringify!($widget)),
-                ))
+                    "no widget uid:{} type:{} found in panel",
+                    $uid,
+                    stringify!($widget)
+                    )
             }
         };
 
-            let verb = AfbVerb::new(widget.get_uid())
-                .set_info(widget.get_info())
-                .set_action(widget.get_action())?
-                .set_callback(Box::new($ctx_type { widget }));
+        let verb = AfbVerb::new(widget.get_uid())
+            .set_info(widget.get_info())
+            .set_action(widget.get_action())?
+            .set_callback(Box::new($ctx_type { widget }));
 
-            $api.add_verb(verb)
+        $api.add_verb(verb)
     };
 }
 
@@ -77,10 +79,10 @@ fn subscribe_evt_cb(
     Ok(())
 }
 
+AfbVerbRegister!(InfoVerb, info_verb_cb, TextCtx);
 struct TextCtx {
     widget: &'static LvglTextArea,
 }
-AfbVerbRegister!(InfoVerb, info_verb_cb, TextCtx);
 fn info_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut TextCtx) -> Result<(), AfbError> {
     let text = args.get::<String>(0)?;
     ctx.widget.set_value(text.as_str());
@@ -99,10 +101,10 @@ fn meter_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut MeterCtx) -> Result
     Ok(())
 }
 
+AfbVerbRegister!(ArcVerb, arc_verb_cb, ArcCtx);
 struct ArcCtx {
     widget: &'static LvglArc,
 }
-AfbVerbRegister!(ArcVerb, arc_verb_cb, ArcCtx);
 fn arc_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut ArcCtx) -> Result<(), AfbError> {
     let value = args.get::<i32>(0)?;
     ctx.widget.set_value(value);
@@ -110,10 +112,10 @@ fn arc_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut ArcCtx) -> Result<(),
     Ok(())
 }
 
+AfbVerbRegister!(BarVerb, bar_verb_cb, BarCtx);
 struct BarCtx {
     widget: &'static LvglBar,
 }
-AfbVerbRegister!(BarVerb, bar_verb_cb, BarCtx);
 fn bar_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut BarCtx) -> Result<(), AfbError> {
     let value = args.get::<i32>(0)?;
     ctx.widget.set_value(value);
@@ -121,10 +123,10 @@ fn bar_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut BarCtx) -> Result<(),
     Ok(())
 }
 
+AfbVerbRegister!(NfcVerb, ncf_verb_cb, NfcCtx);
 struct NfcCtx {
     widget: &'static LvglPixButton,
 }
-AfbVerbRegister!(NfcVerb, ncf_verb_cb, NfcCtx);
 fn ncf_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut NfcCtx) -> Result<(), AfbError> {
     match args.get::<&QueryOnOff>(0)? {
         QueryOnOff::ON => {
@@ -138,10 +140,10 @@ fn ncf_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut NfcCtx) -> Result<(),
     Ok(())
 }
 
+AfbVerbRegister!(SwitchVerb, switch_verb_cb, SwitchCtx);
 struct SwitchCtx {
     widget: &'static LvglSwitch,
 }
-AfbVerbRegister!(SwitchVerb, switch_verb_cb, SwitchCtx);
 fn switch_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut SwitchCtx) -> Result<(), AfbError> {
     match args.get::<&QueryOnOff>(0)? {
         QueryOnOff::ON => {
@@ -155,10 +157,10 @@ fn switch_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut SwitchCtx) -> Resu
     Ok(())
 }
 
+AfbVerbRegister!(LedVerb, led_verb_cb, LedCtx);
 struct LedCtx {
     widget: &'static LvglLed,
 }
-AfbVerbRegister!(LedVerb, led_verb_cb, LedCtx);
 fn led_verb_cb(rqt: &AfbRequest, args: &AfbData, ctx: &mut LedCtx) -> Result<(), AfbError> {
     match args.get::<&QueryOnOff>(0)? {
         QueryOnOff::ON => {
