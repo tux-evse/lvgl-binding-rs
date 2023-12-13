@@ -133,7 +133,7 @@ impl DisplayHandle {
 
         self.panel.push(
             LvglSwitch::new(icon_area, "Switch-1", 200, 0)
-                .set_lock(false)
+                .set_disable(false)
                 .set_value(false)
                 .set_height(20)
                 .finalize(),
@@ -141,7 +141,7 @@ impl DisplayHandle {
 
         self.panel.push(
             LvglSwitch::new(icon_area, "Switch-2", 260, 0)
-                .set_lock(true)
+                .set_disable(true)
                 .set_value(true)
                 .set_height(20)
                 .finalize(),
