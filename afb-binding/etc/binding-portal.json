@@ -1,0 +1,30 @@
+{
+    "name": "afb-display",
+    "port": 80,
+    "https": false,
+    "https-cert": "afb-binding/etc/ssl/devel-cert.pem",
+    "https-key": "afb-binding/etc/ssl/devel-key.pem",
+    "alias": [
+        "/devtools:/usr/share/afb-ui-devtools/binder",
+        "/:$PWD/afb-binding/etc/html",
+        "/assets:$PWD/afb-binding/etc"
+    ],
+    "test":1,
+    "monitoring": true,
+    "binding": [
+        {
+            "uid": "display-lvgl",
+            "api": "display",
+            "path": "${CARGO_TARGET_DIR}debug/libafb_lvgl.so",
+            "info": "lvgl embedded display binding",
+            "permission": "acl:display:client",
+         	"logo": "./afb-binding/etc/tux-evsex150.png",
+            "test": 1,
+            "display": {
+                "x_res": 1024,
+                "y_res": 600,
+                "ratio": 1
+            }
+        }
+    ]
+}

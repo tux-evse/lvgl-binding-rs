@@ -1,6 +1,7 @@
 package
 target/
 .*.sw*
+*pem
 *.tar.gz
 _*
 ~*

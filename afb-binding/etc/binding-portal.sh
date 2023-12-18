@@ -35,4 +35,4 @@ if test -n "$PERMISION_ADM"; then
 fi
 
 # start binder with test config
-afb-binder --trap-faults=no -v --config=afb-binding/etc/binding-native-lvgl.json
+sudo PWD=$PWD CARGO_TARGET_DIR=$CARGO_TARGET_DIR LD_LIBRARY_PATH=$LD_LIBRARY_PATH afb-binder -vvv --tracereq=all --config=afb-binding/etc/binding-portal.json
