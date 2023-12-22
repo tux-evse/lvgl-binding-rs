@@ -89,6 +89,7 @@ impl DisplayHandle {
                 .set_value("This is a label widget")
                 .set_title("Label widget", 100, 75, LvglMkFont::std_10())
                 .set_size(300, 100)
+                .set_disable(true)
                 .set_color(LvglColor::rvb(0, 0, 0))
                 .set_background(LvglColor::rvb(0xFF, 0xFF, 0xFF))
                 .set_border(3, LvglColor::rvb(0, 0xff, 0))
