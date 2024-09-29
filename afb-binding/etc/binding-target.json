@@ -13,9 +13,9 @@
             "info": "lvgl embedded display binding",
             "permission": "acl:display:client",
             "display": {
-                "x_res": 1024,
-                "y_res": 800,
-                "ration": 1
+                "x_res": 1920,
+                "y_res": 1080,
+                "ratio": 1
             }
         }
     ]
